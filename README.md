@@ -95,12 +95,25 @@ works in ordinary inputs, in textareas, and in rich text editors.
 If that trade is not worth it to you, the prefix is one line in
 `src/content/main.js`. There is no settings screen yet.
 
-## Where it does not work
+## The new tab
 
-Chrome will not let any extension run code on `chrome://` pages, the New Tab
-Page, the Web Store, or the PDF viewer. Nothing can be done about that from the
-page side, so the prefix is simply dead there. It is the one gap I have not
-closed, and I am still testing whether the extension's own popup can stand in.
+Chrome will not let any extension run code on its own pages, so the prefix was
+dead on the New Tab Page. The way round it is to bring your own new tab, so
+this replaces it: a search box, your most visited sites, and every key working
+the way it does everywhere else.
+
+Search goes to Google. The sites come from Chrome's own list, the same one it
+uses for its shortcuts.
+
+One quirk worth knowing. When an extension overrides the new tab, Chrome parks
+the cursor in the address bar rather than the page. The page grabs focus back
+as it loads, which works, but if you ever open a new tab and the keys ignore
+you, click once on the page.
+
+## Where it still does not work
+
+`chrome://` pages, the Web Store, and the PDF viewer. Same rule, and there is
+no way round it there, because you cannot bring your own version of those.
 
 The address bar is the other one. If your cursor is in the omnibox, the keys
 belong to Chrome, not to the page.
