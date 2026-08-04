@@ -1,15 +1,28 @@
 const search = document.getElementById('q');
 
 // Chrome parks focus in the omnibox when an extension overrides the New Tab
-// Page. Claiming it here is what lets Ctrl-A reach the page at all.
+// Page, and it does so around load rather than before it. A single focus()
+// call races that and loses, which is why Cmd-T used to leave you typing in
+// the address bar. So keep claiming focus for a short window instead.
 function claimFocus() {
+  window.focus();
   search.focus({ preventScroll: true });
 }
 
-claimFocus();
-window.addEventListener('load', claimFocus);
+function claimFocusUntil(ms) {
+  const deadline = performance.now() + ms;
+  (function again() {
+    claimFocus();
+    if (performance.now() < deadline) requestAnimationFrame(again);
+  })();
+}
+
+claimFocusUntil(800);
+document.addEventListener('DOMContentLoaded', () => claimFocusUntil(400));
+window.addEventListener('load', () => claimFocusUntil(400));
+window.addEventListener('pageshow', () => claimFocusUntil(400));
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) claimFocus();
+  if (!document.hidden) claimFocusUntil(200);
 });
 
 function faviconUrl(pageUrl) {
