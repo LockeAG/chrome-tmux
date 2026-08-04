@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>chrome-tmux promo</title>
+    <style>
+      /* Fluid so one page serves the cover, the small tile and the marquee.
+         Capture it at any size, then fit and pad to the exact target. */
+      :root {
+        --bg: #1a1b26;
+        --panel: #16161e;
+        --line: #292e42;
+        --fg: #c0caf5;
+        --dim: #565f89;
+        --green: #9ece6a;
+        --orange: #ff9e64;
+        --blue: #7aa2f7;
+        --u: 1vmin;
+      }
+
+      * { box-sizing: border-box; margin: 0; }
+
+      html, body { height: 100%; }
+
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+
+      /* Flat background so the fit-and-pad step leaves no visible seam. */
+      .frame {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background: var(--bg);
+      }
+
+      main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: calc(var(--u) * 3.4);
+        padding: calc(var(--u) * 4);
+        text-align: center;
+      }
+
+      .mark {
+        position: relative;
+        width: calc(var(--u) * 15);
+        height: calc(var(--u) * 15);
+        border-radius: calc(var(--u) * 3.4);
+        background: var(--panel);
+        border: 1px solid var(--line);
+        box-shadow: 0 calc(var(--u) * 1.6) calc(var(--u) * 5) rgba(0, 0, 0, .45);
+      }
+      .mark::before,
+      .mark::after {
+        content: '';
+        position: absolute;
+        background: var(--green);
+        border-radius: calc(var(--u) * 0.5);
+      }
+      .mark::before {
+        left: 34%; width: 32%;
+        top: 26%; height: 36%;
+      }
+      .mark::after {
+        left: 26%; width: 48%;
+        top: 70%; height: 10%;
+      }
+
+      h1 {
+        font-size: calc(var(--u) * 7.4);
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        line-height: 1;
+      }
+      h1 em { font-style: normal; color: var(--green); }
+
+      p {
+        font-size: calc(var(--u) * 2.5);
+        color: var(--dim);
+        max-width: 60ch;
+      }
+
+      .keys {
+        display: flex;
+        align-items: center;
+        gap: calc(var(--u) * 1.4);
+        font-size: calc(var(--u) * 2.3);
+        color: var(--dim);
+      }
+
+      kbd {
+        display: inline-block;
+        padding: calc(var(--u) * 0.9) calc(var(--u) * 1.7);
+        border-radius: calc(var(--u) * 1);
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-bottom-width: calc(var(--u) * 0.45);
+        color: var(--fg);
+        font-family: inherit;
+        font-size: inherit;
+      }
+      kbd.hot { color: var(--orange); }
+      kbd.go { color: var(--blue); }
+    </style>
+  </head>
+  <body>
+    <div class="frame" id="frame">
+      <main>
+        <div class="mark"></div>
+        <h1>chrome<em>-tmux</em></h1>
+        <p>Drive Chrome the way you drive tmux.</p>
+        <div class="keys">
+          <kbd class="hot">Ctrl-A</kbd>
+          <span>then</span>
+          <kbd class="go">o</kbd>
+          <span>every tab, one search</span>
+        </div>
+      </main>
+    </div>
+    <script src="promo.js"></script>
+  </body>
+</html>

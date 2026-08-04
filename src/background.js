@@ -28,7 +28,7 @@ async function paintBadge(tabId, state) {
     if (text) {
       await chrome.action.setBadgeBackgroundColor({
         tabId,
-        color: armed ? '#c2410c' : '#15803d'
+        color: armed ? '#ff9e64' : '#9ece6a'
       });
     }
   } catch {

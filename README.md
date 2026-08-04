@@ -1,5 +1,7 @@
 # chrome-tmux
 
+![chrome-tmux](assets/store/cover.png)
+
 Drive Chrome the way you drive tmux. Hit `Ctrl-A`, then a letter.
 
 I live in tmux all day, and every time I switch to the browser my hands keep
@@ -40,7 +42,13 @@ itself into them rather than making you reload everything.
 
 ## What it looks like
 
-<!-- screenshots go here -->
+`Ctrl-A` then `o`, the tab tree over the new tab page:
+
+![The tab tree](assets/store/screenshot-02.png)
+
+`Ctrl-A` then `?`, every key without leaving the page:
+
+![The help overlay](assets/store/screenshot-01.png)
 
 ## The keys
 
@@ -134,6 +142,21 @@ restyle it.
 - Link hints skip anything inside an iframe.
 - Find uses `window.find`, which is old and unofficial. It works today.
 - No counts like `3j`, no marks.
+
+## Building the images
+
+Everything in `assets/store/` is generated, at Chrome Web Store sizes, on the
+Tokyo Night background:
+
+```fish
+node tools/make-icons.js icons
+node tools/make-store-shots.js ~/Desktop/Chrome-Tmux assets/store
+node tools/make-promo.js <capture-of-tools/promo.html> assets/store
+```
+
+`tools/promo.html` is the cover art. Serve it, capture it at any window size,
+and `make-promo.js` cuts it into the cover, the small tile and the marquee. The
+page is flat and centred so the padding never shows a seam.
 
 ## Licence
 
