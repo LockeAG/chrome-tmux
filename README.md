@@ -1,4 +1,4 @@
-# Simple Vim
+# chrome-tmux
 
 A tmux-style prefix and a vim mode for Chrome. No build step, no dependencies.
 
@@ -13,8 +13,8 @@ open -a "Google Chrome" chrome://extensions
 
 Turn on Developer mode, click "Load unpacked", pick this directory.
 
-Already-open tabs have no content script until they reload. Reload the tabs you
-want to test on.
+Tabs that were already open get the content script injected on demand, so no
+reloading is needed.
 
 ## Keys
 
@@ -98,7 +98,7 @@ Running it needs the `prefix` command bound by hand first, since it fires from
 the command handler. Then press it on `chrome://extensions`. No content script
 replies, so the service worker treats it as a dead zone and calls `openPopup()`.
 
-Open the service worker console (`chrome://extensions` → Simple Vim → "service
+Open the service worker console (`chrome://extensions` → Chrome tmux → "service
 worker") and read the line:
 
 - `openPopup succeeded` → the popup can host the second key. Build the fallback.

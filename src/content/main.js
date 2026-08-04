@@ -5,8 +5,9 @@
    vim  --(C-a v|Esc)-> off
    vim  --(C-a)-------> armed --(key)--> vim
 
-   The prefix itself never reaches this file. Chrome swallows C-a at browser
-   level and fires the command, so the service worker tells us we are armed.
+   The prefix is caught here, in the page. On pages where no content script
+   runs, chrome.commands catches it instead and the service worker tells us we
+   are armed. Only one of those paths is ever live for a given key press.
 
    Wrapped in an IIFE because the service worker may inject this file into a
    tab that already has it. Re-running bare top-level `const` would throw. */
@@ -14,7 +15,8 @@
 (() => {
   // A previous instance may still be here: injected twice, or orphaned by an
   // extension reload. Either way, retire it and take over.
-  globalThis.__SIMPLE_VIM__?.retire?.();
+  globalThis.__CHROME_TMUX__?.retire?.();
+  globalThis.__SIMPLE_VIM__?.retire?.(); // pre-rename symbol, drop later
 
   const SCROLL_STEP = 64;
   const UI = globalThis.SV_UI;
@@ -329,6 +331,6 @@
     if (response?.mode) setMode(response.mode);
   });
 
-  globalThis.__SIMPLE_VIM__ = { retire };
-  console.log('[simple-vim] content script ready');
+  globalThis.__CHROME_TMUX__ = { retire };
+  console.log('[chrome-tmux] content script ready');
 })();

@@ -101,9 +101,9 @@ globalThis.SV_UI = (() => {
   function ensureRoot() {
     if (root && host?.isConnected) return root;
     // Drop a host left behind by an earlier instance of this script.
-    document.getElementById('__simple_vim__')?.remove();
+    document.getElementById('__chrome_tmux__')?.remove();
     host = document.createElement('div');
-    host.id = '__simple_vim__';
+    host.id = '__chrome_tmux__';
     host.style.setProperty('position', 'fixed', 'important');
     host.style.setProperty('inset', '0', 'important');
     host.style.setProperty('z-index', '2147483647', 'important');

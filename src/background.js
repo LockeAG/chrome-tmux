@@ -55,7 +55,7 @@ async function ensureContentScript(tabId, url) {
     });
     return true;
   } catch (error) {
-    console.warn('[simple-vim] inject failed:', error?.message ?? error);
+    console.warn('[chrome-tmux] inject failed:', error?.message ?? error);
     return false;
   }
 }
@@ -74,10 +74,10 @@ chrome.runtime.onInstalled.addListener(async () => {
 async function tryOpenPopup(where) {
   try {
     await chrome.action.openPopup();
-    console.log(`[simple-vim] openPopup succeeded from ${where}`);
+    console.log(`[chrome-tmux] openPopup succeeded from ${where}`);
     return true;
   } catch (error) {
-    console.warn(`[simple-vim] openPopup failed from ${where}:`, error?.message ?? error);
+    console.warn(`[chrome-tmux] openPopup failed from ${where}:`, error?.message ?? error);
     return false;
   }
 }
