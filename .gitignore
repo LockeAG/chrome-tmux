@@ -1,0 +1,9 @@
+CLAUDE.md
+*.claude.md
+.claude/
+.ai/
+.impeccable/
+
+.DS_Store
+node_modules/
+*.zip
