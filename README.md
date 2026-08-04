@@ -1,116 +1,127 @@
 # chrome-tmux
 
-A tmux-style prefix and a vim mode for Chrome. No build step, no dependencies.
+Drive Chrome the way you drive tmux. Hit `Ctrl-A`, then a letter.
 
-The model: **prefix owns containers, vim mode owns the page.** Chrome tabs are
-tmux windows, Chrome windows are tmux sessions. No key means two things.
+I live in tmux all day, and every time I switch to the browser my hands keep
+reaching for a prefix key that is not there. So I built one. `Ctrl-A` then `o`
+gives me a searchable list of every tab in every window. `Ctrl-A` then `1` jumps
+to the first tab. The keys I already know, in the app I use most.
+
+There is a vim mode too, for moving around inside a page.
+
+No build step, no dependencies, no network calls. Plain JavaScript and CSS.
+
+## The idea
+
+**The prefix owns containers. Vim mode owns the page.** No key means two things.
+
+If you know tmux, the mapping is the one you would guess:
+
+| tmux | Chrome |
+| --- | --- |
+| window | tab |
+| session | window |
+
+So `Ctrl-A w` lists your tabs, the way `prefix w` lists your windows in tmux.
 
 ## Install
 
+There is no store listing. Load it yourself:
+
 ```fish
+git clone git@github.com:LockeAG/chrome-tmux.git
 open -a "Google Chrome" chrome://extensions
 ```
 
-Turn on Developer mode, click "Load unpacked", pick this directory.
+Turn on Developer mode, click **Load unpacked**, and pick the folder.
 
-Tabs that were already open get the content script injected on demand, so no
-reloading is needed.
+Tabs you already had open start working straight away. The extension injects
+itself into them rather than making you reload everything.
 
-## Keys
+## What it looks like
 
-Prefix is `Control-A`.
+<!-- screenshots go here -->
 
-| Key | Action |
+## The keys
+
+Press `Ctrl-A`, let go, then press one of these. `-- PREFIX --` appears in the
+bottom-left corner while it waits. There is no timeout, same as tmux.
+
+| Key | What it does |
 | --- | --- |
-| `C-a C-o` | tab tree, searchable across every window |
-| `C-a o` / `C-a w` | the same tree |
-| `C-a s` | the same tree, collapsed to windows |
-| `C-a b` / `C-a p` | previous tab in order |
-| `C-a n` | next tab in order |
-| `C-a l` | last tab you were on |
-| `C-a 1-9` | jump to tab N by position |
-| `C-a c` | new tab |
-| `C-a x` | close tab |
-| `C-a v` | toggle vim mode |
-| `C-a ?` | help overlay, drawn in the page; any key closes it |
-| `C-a C-a` | move caret to line start |
+| `Ctrl-A` `Ctrl-O` | the tab tree, searchable across every window |
+| `Ctrl-A` `o` or `w` | the same thing |
+| `Ctrl-A` `s` | the same tree, collapsed to just windows |
+| `Ctrl-A` `b` or `p` | previous tab |
+| `Ctrl-A` `n` | next tab |
+| `Ctrl-A` `l` | back to the last tab you were on |
+| `Ctrl-A` `1`-`9` | jump to a tab by position |
+| `Ctrl-A` `c` | new tab |
+| `Ctrl-A` `x` | close this tab |
+| `Ctrl-A` `v` | vim mode on or off |
+| `Ctrl-A` `?` | show every key, in the page |
+| `Ctrl-A` `Ctrl-A` | jump the caret to the start of the line |
 
-Vim mode, bare keys:
+In vim mode the keys are bare, no prefix. `-- VIM --` sits in the corner so you
+always know where you are.
 
-| Key | Action |
+| Key | What it does |
 | --- | --- |
 | `h` `j` `k` `l` | scroll |
-| `d` / `u` | half page down / up |
-| `gg` / `G` | top / bottom |
-| `f` / `F` | link hints, `F` opens in a background tab |
-| `/` `n` `N` | find, next, previous |
-| `H` / `L` | history back / forward |
+| `d` `u` | half a page down or up |
+| `gg` `G` | top, bottom |
+| `f` | label every link, type the label to follow it |
+| `F` | the same, but opens in a background tab |
+| `/` `n` `N` | find on the page, next, previous |
+| `H` `L` | back, forward |
 | `r` | reload |
 | `Esc` | leave vim mode |
 
-In the switcher, typing filters. Navigation is arrows or `Ctrl-n` / `Ctrl-p`,
-because plain `j` and `k` belong to the search box. `Tab` toggles between tabs
-and windows. `Enter` switches, `Esc` closes.
+Vim mode gets out of the way the moment you click into a text box, and comes
+back when you click out. Typing in a search field never scrolls the page.
 
-## Where the prefix is caught
+In the tab tree, start typing to filter. Move with the arrows or `Ctrl-N` and
+`Ctrl-P`, because plain `j` and `k` belong to the search box. `Tab` switches
+between tabs and windows. `Enter` goes there, `Esc` backs out.
 
-In the page, by the content script.
+## The one annoying trade
 
-Control-A is not a macOS menu accelerator, so unlike a Command shortcut the page
-can claim it before anything else does. That means `chrome.commands` is not
-needed on ordinary pages, which is lucky: Chrome rejects `MacCtrl+A` in the
-manifest, because command shortcuts "must include either Ctrl or Alt" and on
-macOS `Ctrl` means Command.
+This takes over `Ctrl-A` everywhere in Chrome, including inside text boxes. On
+macOS that means you lose "jump to the start of the line".
 
-The `prefix` command is still declared, with no suggested key. Bind it by hand
-at `chrome://extensions/shortcuts` if you want the prefix on `chrome://` pages.
-It has no effect anywhere else, since the page path gets there first.
+Press `Ctrl-A` twice to get it back, exactly like `send-prefix` in tmux. It
+works in ordinary inputs, in textareas, and in rich text editors.
 
-## The Ctrl-A trade
+If that trade is not worth it to you, the prefix is one line in
+`src/content/main.js`. There is no settings screen yet.
 
-The content script swallows Ctrl-A everywhere, including inside text fields, so
-the macOS "move to start of line" binding stops working.
+## Where it does not work
 
-`C-a C-a` gives it back. The second press is caught the same way and the caret
-is moved by hand. Works in inputs, textareas, and contenteditable.
+Chrome will not let any extension run code on `chrome://` pages, the New Tab
+Page, the Web Store, or the PDF viewer. Nothing can be done about that from the
+page side, so the prefix is simply dead there. It is the one gap I have not
+closed, and I am still testing whether the extension's own popup can stand in.
 
-## Known gaps
+The address bar is the other one. If your cursor is in the omnibox, the keys
+belong to Chrome, not to the page.
 
-1. **`chrome://` pages, the New Tab Page, the Web Store, the PDF viewer.** No
-   content script runs there, so nothing catches the prefix at all. Binding the
-   `prefix` command by hand gets you as far as an armed state; catching the
-   second key there still needs the fallback below.
-2. **Focus in the omnibox.** Keys go to the address bar, not the page.
+## A note on privacy
 
-The badge (`^A` armed, `V` vim mode) is the mitigation. Tabs that were already
-open when the extension loaded get the content script injected on demand, so no
-reloading is needed.
+It makes no network requests at all. Nothing is collected, nothing is sent
+anywhere, and there is no remote code or `eval` in it. It reads your tab titles
+and URLs because that is what a tab switcher does, and they never leave your
+browser. The interface lives in a closed shadow root, so pages cannot read it or
+restyle it.
 
-The prefix has no timeout, same as tmux. Once armed it waits, and `-- PREFIX --`
-bottom-left says so. Escape or any unmapped key clears it.
+## Rough edges, honestly
 
-## Open spike
+- No settings screen. The keymap lives in the source.
+- On Windows and Linux `Ctrl-A` is select-all, so the default prefix is a poor
+  fit there. This was built for macOS.
+- Link hints skip anything inside an iframe.
+- Find uses `window.find`, which is old and unofficial. It works today.
+- No counts like `3j`, no marks.
 
-Whether `chrome.action.openPopup()` is allowed from a command handler is
-undocumented, and the answer decides whether gap 1 can be closed.
+## Licence
 
-Running it needs the `prefix` command bound by hand first, since it fires from
-the command handler. Then press it on `chrome://extensions`. No content script
-replies, so the service worker treats it as a dead zone and calls `openPopup()`.
-
-Open the service worker console (`chrome://extensions` → Chrome tmux → "service
-worker") and read the line:
-
-- `openPopup succeeded` → the popup can host the second key. Build the fallback.
-- `openPopup failed` → the only fallback left is
-  `chrome.windows.create({type: "popup"})`, with real focus-steal cost.
-
-`C-a ?` runs the same call from the content-script path, which is the ordinary
-case rather than the interesting one.
-
-Set `SPIKE_OPEN_POPUP` to `false` in `src/background.js` once the answer is in.
-
-## Not done yet
-
-- The `chrome://` fallback, pending the spike above.
-- Counts (`3j`), marks, and a configurable keymap.
+MIT.
