@@ -4,212 +4,136 @@
 
 Drive Chrome the way you drive tmux. Hit `Ctrl-A`, then a letter.
 
-I live in tmux all day, and every time I switch to the browser my hands keep
-reaching for a prefix key that is not there. So I built one. `Ctrl-A` then `o`
-gives me a searchable list of every tab in every window. `Ctrl-A` then `1` jumps
-to the first tab. The keys I already know, in the app I use most.
+No build step, no dependencies, no network calls.
 
-There is a vim mode too, for moving around inside a page.
-
-No build step, no dependencies, no network calls. Plain JavaScript and CSS.
-
-## The idea
-
-**The prefix owns containers. Vim mode owns the page.** No key means two things.
-
-If you know tmux, the mapping is the one you would guess:
-
-| tmux | Chrome |
-| --- | --- |
-| window | tab |
-| session | window |
-
-So `Ctrl-A w` lists your tabs, the way `prefix w` lists your windows in tmux.
+**The prefix owns containers. Vim mode owns the page.** A Chrome tab is a tmux
+window, a Chrome window is a tmux session, so `Ctrl-A w` lists your tabs the way
+`prefix w` lists your windows.
 
 ## Install
-
-There is no store listing. Load it yourself:
 
 ```fish
 git clone git@github.com:LockeAG/chrome-tmux.git
 open -a "Google Chrome" chrome://extensions
 ```
 
-Turn on Developer mode, click **Load unpacked**, and pick the folder.
-
-Tabs you already had open start working straight away. The extension injects
-itself into them rather than making you reload everything.
+Developer mode on, **Load unpacked**, pick the folder. Tabs you already had open
+start working straight away.
 
 ## What it looks like
 
-`Ctrl-A` then `Ctrl-O`, then type. Every tab in every window, filtered as you go:
-
 ![The tab tree](assets/store/screenshot-02.png)
-
-`Ctrl-A` then `?`. Every key, drawn in the page, without leaving it:
 
 ![The help overlay](assets/store/screenshot-01.png)
 
-## The keys
+## Prefix
 
-Press `Ctrl-A`, let go, then press one of these. `-- PREFIX --` appears in the
-bottom-left corner while it waits. There is no timeout, same as tmux.
+Press `Ctrl-A`, let go, then one of these. `-- PREFIX --` shows bottom-left while
+it waits. No timeout, same as tmux.
 
 | Key | What it does |
 | --- | --- |
-| `Ctrl-A` `Ctrl-O` | the tab tree, searchable across every window |
-| `Ctrl-A` `o` or `w` | the same thing |
-| `Ctrl-A` `s` | the same tree, collapsed to one row per window |
-| `Ctrl-A` `b` or `l` | toggle back to the last tab you were on |
-| `Ctrl-A` `p` | previous tab in order |
-| `Ctrl-A` `n` | next tab in order |
-| `Ctrl-A` `1`-`9` | jump to a tab by position |
-| `Ctrl-A` `m` | jump to a call, cycles if there are several |
-| `Ctrl-A` `c` | new tab |
-| `Ctrl-A` `x` | close this tab |
-| `Ctrl-A` `v` | vim mode on or off |
-| `Ctrl-A` `?` | show every key, in the page |
-| `Ctrl-A` `Ctrl-A` | jump the caret to the start of the line |
+| `Ctrl-O` / `o` / `w` | the tab tree, searchable across every window |
+| `s` | the same tree, one row per window |
+| `b` / `l` | toggle back to the last tab you were on |
+| `p` / `n` | previous / next tab in order |
+| `1`-`9` | jump to a tab by position |
+| `m` | jump to a call, cycles if there are several |
+| `c` | new tab |
+| `x` | close this tab |
+| `v` | vim mode on or off |
+| `?` | show every key, in the page |
+| `Ctrl-A` | jump the caret to the start of the line |
 
-In vim mode the keys are bare, no prefix. `-- VIM --` sits in the corner so you
-always know where you are.
+## Vim mode
+
+Bare keys, no prefix. `-- VIM --` shows bottom-left. It stands aside while a
+text box has focus, so typing in a search field never scrolls the page.
 
 | Key | What it does |
 | --- | --- |
 | `h` `j` `k` `l` | scroll |
 | `d` `u` | half a page down or up |
 | `gg` `G` | top, bottom |
-| `f` | label every link, type the label to follow it |
-| `F` | the same, but opens in a background tab |
-| `/` `n` `N` | find on the page, next, previous |
+| `f` / `F` | link hints, `F` opens in a background tab |
+| `/` `n` `N` | find, next, previous |
 | `H` `L` | back, forward |
 | `r` | reload |
 | `Esc` | leave vim mode |
 
-Vim mode gets out of the way the moment you click into a text box, and comes
-back when you click out. Typing in a search field never scrolls the page.
+## In the tab tree
 
-In the tab tree, start typing to filter. Move with `Ctrl-J` and `Ctrl-K`, or
-`Ctrl-N` and `Ctrl-P`, or the arrows. They all do the same thing. Plain `j` and
-`k` cannot: the filter box has focus, so they would just type letters. `Tab`
-switches between tabs and windows. `Esc` backs out.
+| Key | What it does |
+| --- | --- |
+| type | filter |
+| `Ctrl-J` / `Ctrl-K` | move, `Ctrl-N` / `Ctrl-P` and arrows too |
+| `Ctrl-X` | close the highlighted tab, list stays open |
+| `Tab` | toggle tabs and windows |
+| `Enter` `Esc` | switch / close |
 
-`Enter` on a tab switches to it. `Enter` on a window row, in the collapsed view,
-brings that window to the front and leaves whatever tab it was showing alone.
-
-`Ctrl-X` closes the highlighted tab and leaves the list open, so you can clear
-out a pile of them in one visit. The list updates in place rather than
-reopening. A page that asks you to confirm before leaving is the one exception:
-Chrome reports the close as accepted before you answer, so if you choose to
-stay, the tab survives and turns up again next time you open the list.
-Closing the tab you are looking at takes the list with it, same as `Ctrl-A x`
-would. It does nothing in the collapsed windows view, where a row is a window
-rather than a tab.
+Plain `j` and `k` cannot move: the filter box has focus, so they would type
+letters. `Enter` on a window row brings that window forward and leaves its own
+tab alone.
 
 ## Calls come first
 
-A tab that is a live call gets hoisted to the top of the tab tree under **In a
-call**, tinted blue, with a dot on the right that turns green while the tab is
-making sound. When you filter, call tabs are weighted so they stay near the top.
+A live call is hoisted to the top under **In a call**, tinted, with a dot that
+turns green while the tab is making sound. `Ctrl-A m` skips the tree and jumps
+straight there.
 
-`Ctrl-A` `m` skips the tree entirely and jumps straight there. Press it again to
-cycle if you are in more than one.
-
-Recognised by the shape of the URL, so a meeting counts but a landing page does
-not. Covered: Google Meet, Zoom, Teams, Webex, Amazon Chime, GoTo Meeting,
-BlueJeans, Skype, Jitsi, Around and Gather. The list is one array in
-`src/calls.js`, with a test beside it.
-
-Discord and Slack are deliberately absent. Joining a voice channel or a huddle
-does not change the URL, so any pattern would flag every channel and every
-workspace you have open.
-
-Teams is the weak one. It only matches while you are on the join page, because
-once you are in the call it rewrites the URL to something with nothing reliable
-to match on. Guessing would cost false positives.
+Recognised from the URL, so a meeting counts and a landing page does not. Meet,
+Zoom, Teams, Webex, Chime, GoTo, BlueJeans, Skype, Jitsi, Around, Gather. One
+array in `src/calls.js`, with a test beside it.
 
 ## The one annoying trade
 
-This takes over `Ctrl-A` everywhere in Chrome, including inside text boxes. On
-macOS that means you lose "jump to the start of the line".
-
-Press `Ctrl-A` twice to get it back, exactly like `send-prefix` in tmux. It
-works in ordinary inputs, in textareas, and in rich text editors.
-
-If that trade is not worth it to you, the prefix is one line in
-`src/content/main.js`. There is no settings screen yet.
+This takes `Ctrl-A` everywhere in Chrome, including inside text boxes, so on
+macOS you lose "jump to the start of the line". Press `Ctrl-A` twice to get it
+back, like `send-prefix` in tmux. The prefix is one line in
+`src/content/main.js` if the trade is not worth it.
 
 ## The new tab
 
-Chrome will not let any extension run code on its own pages, so the prefix was
-dead on the New Tab Page. The way round it is to bring your own new tab, so
-this replaces it: a search box, your most visited sites, and every key working
-the way it does everywhere else.
+Chrome forbids extensions from running on its own pages, so this brings its own
+new tab: a search box and your most visited sites, with every key working.
 
-Search goes to Google. The sites come from Chrome's own list, the same one it
-uses for its shortcuts.
-
-One quirk worth knowing. When an extension overrides the new tab, Chrome parks
-the cursor in the address bar rather than the page. The page grabs focus back
-as it loads, which works, but if you ever open a new tab and the keys ignore
-you, click once on the page.
-
-## Where it still does not work
-
-`chrome://` pages, the Web Store, and the PDF viewer. Same rule, and there is
-no way round it there, because you cannot bring your own version of those. Do
-not try to reach them by binding a browser-level shortcut either: that makes
-Chrome swallow `Ctrl-A` everywhere and breaks the prefix on the pages where it
-does work.
-
-The address bar is the other one. If your cursor is in the omnibox, the keys
-belong to Chrome, not to the page.
-
-## A note on privacy
-
-It makes no network requests at all. Nothing is collected, nothing is sent
-anywhere, and there is no remote code or `eval` in it. It reads your tab titles
-and URLs because that is what a tab switcher does, and they never leave your
-browser. The interface lives in a closed shadow root, so pages cannot read it or
-restyle it.
+Chrome parks the cursor in the address bar on an overridden new tab. The page
+takes focus back as it loads. If one ever ignores you, click it once.
 
 ## Rough edges, honestly
 
+- `chrome://` pages, the Web Store and the PDF viewer are dead. No way round it.
+  Binding a browser-level shortcut makes it worse, not better: Chrome would then
+  swallow `Ctrl-A` before any page sees it.
+- Keys in the omnibox belong to Chrome, not to the page.
 - No settings screen. The keymap lives in the source.
-- On Windows and Linux `Ctrl-A` is select-all, so the default prefix is a poor
-  fit there. This was built for macOS.
-- Link hints skip anything inside an iframe.
-- Find uses `window.find`, which is old and unofficial. It works today.
+- `Ctrl-A` is select-all on Windows and Linux. This was built for macOS.
+- Link hints skip iframes. Find uses `window.find`, old and unofficial.
 - No counts like `3j`, no marks.
+- Teams only matches its join page; it rewrites the URL once you are in a call.
+- Discord and Slack are absent on purpose. A voice channel or a huddle does not
+  change the URL, so any pattern would flag every channel you have open.
 - `Ctrl-X` reports success as soon as Chrome accepts the close. A page that
   stops you leaving with a dialog can survive it and reappear in the list.
 
-## Tests
+## Privacy
 
-The URL patterns are the one part of this worth testing, because a wrong one
-either hides your call or hoists a pricing page above it.
+No network requests, no remote code, no `eval`, nothing collected. It reads tab
+titles and URLs because that is what a tab switcher does, and they never leave
+your browser. The interface lives in a closed shadow root, so pages cannot read
+or restyle it.
 
-```fish
-npm test
-```
-
-Every supported provider has a real meeting URL in `test/calls.test.mjs`, and
-every near miss that has ever been a false positive is in there next to it.
-
-## Building the images
-
-Everything in `assets/store/` is generated, at Chrome Web Store sizes, on the
-Tokyo Night background:
+## Development
 
 ```fish
-node tools/make-icons.cjs icons
-node tools/make-store-shots.cjs ~/Desktop/Chrome-Tmux assets/store
-node tools/make-promo.cjs <capture-of-tools/promo.html> assets/store
+npm test                                           # call URL patterns
+node tools/make-icons.cjs icons                    # extension icons
+node tools/make-store-shots.cjs <src> assets/store
+node tools/make-promo.cjs <capture> assets/store
 ```
 
-`tools/promo.html` is the cover art. Serve it, capture it at any window size,
-and `make-promo.cjs` cuts it into the cover, the small tile and the marquee. The
-page is flat and centred so the padding never shows a seam.
+`tools/promo.html` is the cover art. Serve it, capture it at any size, and
+`make-promo.cjs` cuts it into the cover, tile and marquee.
 
 ## Changelog
 
