@@ -305,7 +305,11 @@
     switch (message.type) {
       case 'switcher':
         setArmed(false);
-        UI.openSwitcher(message, (tabId) => send({ type: 'pick', tabId }));
+        UI.openSwitcher(
+          message,
+          (target) => send({ type: 'pick', ...target }),
+          (tabId) => send({ type: 'close', tabId })
+        );
         break;
     }
   });

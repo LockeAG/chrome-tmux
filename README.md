@@ -94,6 +94,15 @@ In the tab tree, start typing to filter. Move with `Ctrl-J` and `Ctrl-K`, or
 `k` cannot: the filter box has focus, so they would just type letters. `Tab`
 switches between tabs and windows. `Enter` goes there, `Esc` backs out.
 
+`Ctrl-X` closes the highlighted tab and leaves the list open, so you can clear
+out a pile of them in one visit. The list updates in place rather than
+reopening. A page that asks you to confirm before leaving is the one exception:
+Chrome reports the close as accepted before you answer, so if you choose to
+stay, the tab survives and turns up again next time you open the list.
+Closing the tab you are looking at takes the list with it, same as `Ctrl-A x`
+would. It does nothing in the collapsed windows view, where a row is a window
+rather than a tab.
+
 ## Calls come first
 
 A tab that is a live call gets hoisted to the top of the tab tree under **In a

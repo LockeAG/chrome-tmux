@@ -26,6 +26,8 @@ Everything so far. Nothing has been tagged yet, and there is no store listing.
   straight to a call and cycles if there are several. Covers Google Meet, Zoom,
   Teams, Webex, Amazon Chime, GoTo Meeting, BlueJeans, Skype, Jitsi, Around and
   Gather.
+- `Ctrl-X` in the tab tree closes the highlighted tab without leaving the list,
+  which updates in place.
 - Tests. `npm test`, no dependencies, covering the call URL patterns against
   real meeting URLs and every near miss that has been a false positive.
 - Generated store assets and the scripts that build them, at Chrome Web Store

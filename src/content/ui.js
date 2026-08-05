@@ -172,8 +172,10 @@ globalThis.SV_UI = (() => {
     switcher = null;
   }
 
-  function openSwitcher({ groups, activeTabId, collapsed }, onPick) {
+  function openSwitcher({ groups, activeTabId, collapsed }, onPick, onClose) {
     closeSwitcher();
+    // Identity for this overlay, so work still in flight cannot act on a later one.
+    const token = {};
     const r = ensureRoot();
 
     const scrim = el('div', 'scrim');
@@ -185,7 +187,7 @@ globalThis.SV_UI = (() => {
     const footer = el(
       'div',
       'footer',
-      'enter switch · ctrl-j/ctrl-k move · tab toggle windows · esc close'
+      'enter switch · ctrl-j/ctrl-k move · ctrl-x close tab · tab windows · esc'
     );
 
     panel.append(search, list, footer);
@@ -198,9 +200,11 @@ globalThis.SV_UI = (() => {
     function entries() {
       if (collapsed) {
         return groups.map((g) => {
-          const active = g.tabs.find((t) => t.active) ?? g.tabs[0];
+          // No fallback: after a local close the window may have no flagged
+          // active tab, and naming the wrong one is worse than naming none.
+          const active = g.tabs.find((t) => t.active);
           return {
-            tabId: active?.id,
+            windowId: g.windowId,
             group: null,
             title: `Window · ${g.tabs.length} tab${g.tabs.length === 1 ? '' : 's'}`,
             url: active?.title ?? '',
@@ -247,7 +251,7 @@ globalThis.SV_UI = (() => {
       list.textContent = '';
       rows = [];
       if (!items.length) {
-        list.append(el('div', 'empty', 'No matches'));
+        list.append(el('div', 'empty', query ? 'No matches' : 'No tabs'));
         return;
       }
 
@@ -291,8 +295,33 @@ globalThis.SV_UI = (() => {
     }
 
     function pick(item) {
+      if (!item) return;
       closeSwitcher();
-      if (item?.tabId !== undefined) onPick(item.tabId);
+      if (item.windowId !== undefined) onPick({ windowId: item.windowId });
+      else if (item.tabId !== undefined) onPick({ tabId: item.tabId });
+    }
+
+    async function killSelected() {
+      // A row in the collapsed view is a window, not a tab. Closing "its active
+      // tab" is not what the row says it is, so this does nothing there.
+      if (collapsed) return;
+
+      const item = rows[selected]?.item;
+      if (item?.tabId === undefined) return;
+
+      // Drop the row only if Chrome accepted the close.
+      const result = await onClose(item.tabId);
+      if (!result?.ok || switcher?.token !== token) return;
+
+      groups = groups
+        .map((g) => ({ ...g, tabs: g.tabs.filter((t) => t.id !== item.tabId) }))
+        .filter((g) => g.tabs.length);
+
+      if (!groups.length) {
+        closeSwitcher();
+        return;
+      }
+      render();
     }
 
     search.addEventListener('keydown', (event) => {
@@ -311,6 +340,9 @@ globalThis.SV_UI = (() => {
       } else if (event.key === 'ArrowUp' || (ctrl && (event.key === 'p' || event.key === 'k'))) {
         event.preventDefault();
         move(-1);
+      } else if (event.ctrlKey && !event.metaKey && event.key === 'x') {
+        event.preventDefault();
+        killSelected();
       } else if (event.key === 'Tab') {
         event.preventDefault();
         collapsed = !collapsed;
@@ -329,7 +361,7 @@ globalThis.SV_UI = (() => {
       if (event.target === scrim) closeSwitcher();
     });
 
-    switcher = { scrim };
+    switcher = { scrim, token };
     render();
     search.focus({ preventScroll: true });
   }
@@ -364,6 +396,8 @@ globalThis.SV_UI = (() => {
     ['In the tab tree', [
       ['type', 'filter'],
       ['ctrl-j / ctrl-k', 'move, ctrl-n / ctrl-p and arrows too'],
+      ['ctrl-x', 'close the highlighted tab, list stays open'],
+      ['', 'tabs only, not the collapsed windows view'],
       ['tab', 'toggle tabs and windows'],
       ['enter / esc', 'switch / close']
     ]]

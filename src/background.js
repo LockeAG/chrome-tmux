@@ -271,8 +271,29 @@ async function handle(message, sender) {
     }
 
     case 'pick':
-      await focusTab(message.tabId);
+      // A window row focuses the window and leaves its active tab alone.
+      if (message.windowId !== undefined) {
+        await chrome.windows.update(message.windowId, { focused: true }).catch(() => null);
+      } else {
+        await focusTab(message.tabId);
+      }
       return { ok: true };
+
+    case 'close':
+      // Closing the tab hosting the overlay takes the overlay with it, which is
+      // what you would expect and matches `C-a x`.
+      //
+      // ok:true means Chrome accepted the close, not that the tab is gone:
+      // tabs.remove resolves before a beforeunload dialog is answered. A page
+      // that asks you to stay, and that you keep, survives and reappears the
+      // next time the list is opened. Waiting on tabs.onRemoved instead would
+      // hang for as long as the dialog sits there, which is worse.
+      try {
+        await chrome.tabs.remove(message.tabId);
+        return { ok: true };
+      } catch {
+        return { ok: false };
+      }
 
     case 'openUrl': {
       // The href comes from page content, so it is untrusted. Only ever open
