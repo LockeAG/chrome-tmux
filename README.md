@@ -88,9 +88,10 @@ always know where you are.
 Vim mode gets out of the way the moment you click into a text box, and comes
 back when you click out. Typing in a search field never scrolls the page.
 
-In the tab tree, start typing to filter. Move with the arrows or `Ctrl-N` and
-`Ctrl-P`, because plain `j` and `k` belong to the search box. `Tab` switches
-between tabs and windows. `Enter` goes there, `Esc` backs out.
+In the tab tree, start typing to filter. Move with `Ctrl-J` and `Ctrl-K`, or
+`Ctrl-N` and `Ctrl-P`, or the arrows. They all do the same thing. Plain `j` and
+`k` cannot: the filter box has focus, so they would just type letters. `Tab`
+switches between tabs and windows. `Enter` goes there, `Esc` backs out.
 
 ## The one annoying trade
 

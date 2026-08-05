@@ -178,7 +178,7 @@ globalThis.SV_UI = (() => {
     const footer = el(
       'div',
       'footer',
-      'enter switch · ctrl-n/ctrl-p move · tab toggle windows · esc close'
+      'enter switch · ctrl-j/ctrl-k move · tab toggle windows · esc close'
     );
 
     panel.append(search, list, footer);
@@ -341,7 +341,7 @@ globalThis.SV_UI = (() => {
     ]],
     ['In the tab tree', [
       ['type', 'filter'],
-      ['ctrl-n / ctrl-p', 'move, arrows work too'],
+      ['ctrl-j / ctrl-k', 'move, ctrl-n / ctrl-p and arrows too'],
       ['tab', 'toggle tabs and windows'],
       ['enter / esc', 'switch / close']
     ]]
