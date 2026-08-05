@@ -42,11 +42,7 @@ itself into them rather than making you reload everything.
 
 ## What it looks like
 
-`Ctrl-A` then `o`, the tab tree over the new tab page:
-
-![The tab tree](assets/store/screenshot-02.png)
-
-`Ctrl-A` then `?`, every key without leaving the page:
+`Ctrl-A` then `?`. Every key, drawn in the page, without leaving it:
 
 ![The help overlay](assets/store/screenshot-01.png)
 
