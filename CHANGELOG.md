@@ -3,6 +3,15 @@
 Notable changes, newest first. Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 loosely and [semantic versioning](https://semver.org/).
 
+## Unreleased
+
+### Changed
+
+- Screenshots are captured with the page zoomed, so the interface is physically
+  large in a frame the browser caps at about 1512px wide. `make-store-shots.cjs`
+  now crops to the target aspect instead of fitting and padding, which fills the
+  frame and makes the rescale roughly 1:1.
+
 ## 0.1.0 - 2026-08-05
 
 First tag. Load-unpacked only, no store listing.

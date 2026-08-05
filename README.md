@@ -135,6 +135,14 @@ node tools/make-promo.cjs <capture> assets/store
 `tools/promo.html` is the cover art. Serve it, capture it at any size, and
 `make-promo.cjs` cuts it into the cover, tile and marquee.
 
+Capturing screenshots: a browser screenshot comes back around 1512px wide
+however large the viewport is, so on a big display the interface is downscaled
+to mush before anything else runs. Zoom the page first, then capture:
+
+```js
+document.documentElement.style.zoom = '3'
+```
+
 ## Changelog
 
 [CHANGELOG.md](CHANGELOG.md).

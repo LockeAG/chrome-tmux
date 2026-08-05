@@ -1,8 +1,17 @@
-// Normalises raw screenshots into Chrome Web Store sizes: fit inside the
-// target, then pad to exact dimensions on the Tokyo Night background so every
-// shot lines up in the carousel regardless of how it was cropped.
+// Normalises raw screenshots into Chrome Web Store sizes.
 //
-// Run: node tools/make-store-shots.js <sourceDir> <outDir>
+// Crops the largest centred rectangle matching the target aspect, then scales
+// that to size. Cropping rather than padding keeps the frame full and, for a
+// browser capture, makes the rescale close to 1:1 instead of shrinking the
+// whole shot to fit between two bars.
+//
+// Capture crisply in the first place: a browser screenshot comes back around
+// 1512px wide however large the viewport is, so on a big display the UI is
+// downscaled to mush before this script sees it. Zoom the page first
+// (document.documentElement.style.zoom = '3') so the interface is physically
+// large in the frame.
+//
+// Run: node tools/make-store-shots.cjs <sourceDir> <outDir>
 
 const fs = require('fs');
 const path = require('path');
@@ -40,14 +49,21 @@ sources.forEach((name, index) => {
   const target = path.join(OUT, `screenshot-${String(index + 1).padStart(2, '0')}.png`);
 
   const { width, height } = dimensions(source);
-  const scale = Math.min(TARGET.width / width, TARGET.height / height);
-  const fitted = { w: Math.round(width * scale), h: Math.round(height * scale) };
+  const aspect = TARGET.width / TARGET.height;
+
+  // Largest centred rectangle of the target aspect that fits the source.
+  const crop = width / height > aspect
+    ? { w: Math.round(height * aspect), h: height }
+    : { w: width, h: Math.round(width / aspect) };
 
   sips(['-s', 'format', 'png', source, '--out', target]);
-  sips(['-z', String(fitted.h), String(fitted.w), target]);
+  sips(['-c', String(crop.h), String(crop.w), target]);
+  sips(['-z', String(TARGET.height), String(TARGET.width), target]);
+  // No-op unless sips rounded, but keeps the output exactly on size.
   sips(['--padToHeightWidth', String(TARGET.height), String(TARGET.width), '--padColor', PAD, target]);
 
-  console.log(`${name} -> ${path.basename(target)} (${fitted.w}x${fitted.h} padded to 1280x800)`);
+  const ratio = (TARGET.width / crop.w).toFixed(2);
+  console.log(`${name} -> ${path.basename(target)} (crop ${crop.w}x${crop.h}, scale ${ratio}x)`);
 });
 
 console.log(`\n${sources.length} screenshot(s) in ${OUT}`);
