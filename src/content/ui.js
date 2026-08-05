@@ -50,6 +50,13 @@ globalThis.SV_UI = (() => {
       padding: 7px 10px; border-radius: 6px; cursor: pointer;
     }
     .row[data-selected="true"] { background: #292e42; }
+    .row[data-live="true"] .title { color: #7dcfff; }
+
+    .dot {
+      width: 7px; height: 7px; flex: none; margin-left: auto;
+      border-radius: 50%; background: #414868;
+    }
+    .row[data-audible="true"] .dot { background: #9ece6a; }
     .row[data-active="true"] .title { color: #9ece6a; }
 
     .icon { width: 16px; height: 16px; flex: none; border-radius: 3px; }
@@ -202,16 +209,22 @@ globalThis.SV_UI = (() => {
           };
         });
       }
-      return groups.flatMap((g, i) =>
+      const all = groups.flatMap((g, i) =>
         g.tabs.map((t) => ({
           tabId: t.id,
           group: `Window ${i + 1}${g.focused ? ' (current)' : ''}`,
           title: t.title,
           url: t.url,
           favIconUrl: t.favIconUrl,
-          active: t.id === activeTabId
+          active: t.id === activeTabId,
+          live: Boolean(t.live),
+          audible: Boolean(t.audible)
         }))
       );
+
+      // A call you are in is the one tab you always want first.
+      const live = all.filter((item) => item.live).map((item) => ({ ...item, group: 'In a call' }));
+      return live.length ? [...live, ...all.filter((item) => !item.live)] : all;
     }
 
     function render() {
@@ -220,7 +233,12 @@ globalThis.SV_UI = (() => {
 
       if (query) {
         items = items
-          .map((item) => ({ item, rank: Math.max(score(query, item.title), score(query, item.url)) }))
+          .map((item) => {
+            // Bonus only on top of a real match. Adding it first would drag a
+            // call tab that matches nothing past genuine but weak matches.
+            const base = Math.max(score(query, item.title), score(query, item.url));
+            return { item, rank: base < 0 ? -1 : base + (item.live ? 6 : 0) };
+          })
           .filter((x) => x.rank >= 0)
           .sort((a, b) => b.rank - a.rank)
           .map((x) => x.item);
@@ -241,12 +259,15 @@ globalThis.SV_UI = (() => {
         }
         const row = el('div', 'row');
         row.dataset.active = String(item.active);
+        row.dataset.live = String(Boolean(item.live));
+        row.dataset.audible = String(Boolean(item.audible));
         const icon = el('img', 'icon');
         icon.src = item.favIconUrl || 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';
         icon.onerror = () => icon.remove();
         const text = el('div', 'text');
         text.append(el('div', 'title', item.title), el('div', 'url', item.url));
         row.append(icon, text);
+        if (item.live) row.append(el('div', 'dot'));
         row.addEventListener('click', () => pick(item));
         list.append(row);
         rows.push({ node: row, item });
@@ -323,6 +344,7 @@ globalThis.SV_UI = (() => {
       ['C-a p', 'previous tab in order'],
       ['C-a n', 'next tab in order'],
       ['C-a 1-9', 'jump to tab by position'],
+      ['C-a m', 'jump to a call, cycles if several'],
       ['C-a c', 'new tab'],
       ['C-a x', 'close tab'],
       ['C-a v', 'toggle vim mode'],

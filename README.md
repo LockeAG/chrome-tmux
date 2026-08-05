@@ -64,6 +64,7 @@ bottom-left corner while it waits. There is no timeout, same as tmux.
 | `Ctrl-A` `p` | previous tab in order |
 | `Ctrl-A` `n` | next tab in order |
 | `Ctrl-A` `1`-`9` | jump to a tab by position |
+| `Ctrl-A` `m` | jump to a call, cycles if there are several |
 | `Ctrl-A` `c` | new tab |
 | `Ctrl-A` `x` | close this tab |
 | `Ctrl-A` `v` | vim mode on or off |
@@ -92,6 +93,19 @@ In the tab tree, start typing to filter. Move with `Ctrl-J` and `Ctrl-K`, or
 `Ctrl-N` and `Ctrl-P`, or the arrows. They all do the same thing. Plain `j` and
 `k` cannot: the filter box has focus, so they would just type letters. `Tab`
 switches between tabs and windows. `Enter` goes there, `Esc` backs out.
+
+## Calls come first
+
+A tab that is a live call gets hoisted to the top of the tab tree under **In a
+call**, tinted blue, with a dot on the right that turns green while the tab is
+making sound. When you filter, call tabs are weighted so they stay near the top.
+
+`Ctrl-A` `m` skips the tree entirely and jumps straight there. Press it again to
+cycle if you are in more than one.
+
+Recognised by the shape of the URL, so a meeting counts but a landing page does
+not: Google Meet, Zoom, Teams, Jitsi, Gather. The list is one array at
+the top of `src/background.js`.
 
 ## The one annoying trade
 

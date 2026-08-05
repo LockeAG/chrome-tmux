@@ -125,6 +125,21 @@ chrome.tabs.onRemoved.addListener((tabId) => {
 
 /* Prefix actions */
 
+// A call tab is recognisable from its URL shape. Match the meeting path and a
+// meeting id, not just the host, or landing pages come along for the ride.
+// Teams is join-page only: once you are in a call it rewrites the URL to
+// something with no reliable marker, and guessing at it costs false positives.
+const CALL_PATTERNS = [
+  /^https:\/\/meet\.google\.com\/[a-z]{3}-[a-z]{4}-[a-z]{3}/i,
+  /^https:\/\/([\w-]+\.)*zoom\.us\/(j\/\d|wc\/(join\/)?\d)/i,
+  /^https:\/\/teams\.microsoft\.com\/l\/meetup-join\//i,
+  /^https:\/\/teams\.live\.com\/meet\/[^/?#]+/i,
+  /^https:\/\/meet\.jit\.si\/[^/?#]+/i,
+  /^https:\/\/app\.gather\.town\/app\/[^/?#]+/i
+];
+
+const isCall = (url) => CALL_PATTERNS.some((pattern) => pattern.test(url ?? ''));
+
 async function collectWindows() {
   const windows = await chrome.windows.getAll({ populate: true });
   return windows
@@ -138,7 +153,9 @@ async function collectWindows() {
         title: t.title || t.url || '',
         url: t.url || '',
         favIconUrl: t.favIconUrl || '',
-        active: t.active
+        active: t.active,
+        live: isCall(t.url),
+        audible: Boolean(t.audible)
       }))
     }));
 }
@@ -186,6 +203,16 @@ async function runPrefixAction(key, tab, state) {
     case 'p':
       await cycleTab(tab, -1);
       return state;
+
+    // Jump straight to the call. With more than one, cycle through them.
+    case 'm': {
+      const calls = (await chrome.tabs.query({})).filter((t) => isCall(t.url));
+      if (!calls.length) return state;
+      const at = calls.findIndex((t) => t.id === tab.id);
+      const next = calls[(at + 1) % calls.length];
+      if (next.id !== tab.id) await focusTab(next.id);
+      return state;
+    }
 
     case 'c':
       await chrome.tabs.create({ windowId: tab.windowId });
