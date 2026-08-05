@@ -3,9 +3,9 @@
 Notable changes, newest first. Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 loosely and [semantic versioning](https://semver.org/).
 
-## Unreleased
+## 0.1.0 - 2026-08-05
 
-Everything so far. Nothing has been tagged yet, and there is no store listing.
+First tag. Load-unpacked only, no store listing.
 
 ### Added
 
