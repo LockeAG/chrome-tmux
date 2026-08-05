@@ -27,7 +27,8 @@ Everything so far. Nothing has been tagged yet, and there is no store listing.
   Teams, Webex, Amazon Chime, GoTo Meeting, BlueJeans, Skype, Jitsi, Around and
   Gather.
 - `Ctrl-X` in the tab tree closes the highlighted tab without leaving the list,
-  which updates in place.
+  which updates in place. It does nothing in the collapsed windows view, where a
+  row is a window rather than a tab.
 - Tests. `npm test`, no dependencies, covering the call URL patterns against
   real meeting URLs and every near miss that has been a false positive.
 - Generated store assets and the scripts that build them, at Chrome Web Store
@@ -47,6 +48,11 @@ Everything so far. Nothing has been tagged yet, and there is no store listing.
   injected on demand, instead of needing a reload.
 - Movement in the tab tree is documented as `Ctrl-J` / `Ctrl-K`. `Ctrl-N` /
   `Ctrl-P` and the arrows still work; they always did.
+- A window row in the collapsed view now focuses that window and leaves its
+  active tab alone, instead of activating a tab derived from the snapshot. The
+  old behaviour could pick the wrong tab once the snapshot went stale.
+- The collapsed view shows no subtitle when it cannot tell which tab a window is
+  on, rather than naming the first one and being wrong.
 
 ### Fixed
 
@@ -83,3 +89,7 @@ Everything so far. Nothing has been tagged yet, and there is no store listing.
   fit outside macOS.
 - Link hints skip anything inside an iframe.
 - Teams only matches its join page; it rewrites the URL once you are in a call.
+- `Ctrl-X` treats Chrome accepting a close as success. `chrome.tabs.remove`
+  resolves before a `beforeunload` dialog is answered, so a page you choose to
+  stay on survives and reappears next time the list is opened. Waiting on
+  `tabs.onRemoved` instead would hang for as long as the dialog sits there.

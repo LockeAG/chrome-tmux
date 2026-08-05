@@ -59,7 +59,7 @@ bottom-left corner while it waits. There is no timeout, same as tmux.
 | --- | --- |
 | `Ctrl-A` `Ctrl-O` | the tab tree, searchable across every window |
 | `Ctrl-A` `o` or `w` | the same thing |
-| `Ctrl-A` `s` | the same tree, collapsed to just windows |
+| `Ctrl-A` `s` | the same tree, collapsed to one row per window |
 | `Ctrl-A` `b` or `l` | toggle back to the last tab you were on |
 | `Ctrl-A` `p` | previous tab in order |
 | `Ctrl-A` `n` | next tab in order |
@@ -92,7 +92,10 @@ back when you click out. Typing in a search field never scrolls the page.
 In the tab tree, start typing to filter. Move with `Ctrl-J` and `Ctrl-K`, or
 `Ctrl-N` and `Ctrl-P`, or the arrows. They all do the same thing. Plain `j` and
 `k` cannot: the filter box has focus, so they would just type letters. `Tab`
-switches between tabs and windows. `Enter` goes there, `Esc` backs out.
+switches between tabs and windows. `Esc` backs out.
+
+`Enter` on a tab switches to it. `Enter` on a window row, in the collapsed view,
+brings that window to the front and leaves whatever tab it was showing alone.
 
 `Ctrl-X` closes the highlighted tab and leaves the list open, so you can clear
 out a pile of them in one visit. The list updates in place rather than
@@ -178,6 +181,8 @@ restyle it.
 - Link hints skip anything inside an iframe.
 - Find uses `window.find`, which is old and unofficial. It works today.
 - No counts like `3j`, no marks.
+- `Ctrl-X` reports success as soon as Chrome accepts the close. A page that
+  stops you leaving with a dialog can survive it and reappear in the list.
 
 ## Tests
 
