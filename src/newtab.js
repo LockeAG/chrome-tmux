@@ -5,6 +5,11 @@ const search = document.getElementById('q');
 // call races that and loses, which is why Cmd-T used to leave you typing in
 // the address bar. So keep claiming focus for a short window instead.
 function claimFocus() {
+  // Only take focus that nothing else wants. Without this the retry loop keeps
+  // firing for the best part of a second after load and yanks focus out of the
+  // tab tree if you hit Ctrl-A o straight after Cmd-T.
+  const active = document.activeElement;
+  if (active && active !== document.body && active !== search) return;
   window.focus();
   search.focus({ preventScroll: true });
 }
@@ -37,7 +42,6 @@ chrome.topSites.get().then((sites) => {
   sites.slice(0, 12).forEach((site) => {
     const link = document.createElement('a');
     link.href = site.url;
-    link.tabIndex = -1;
 
     const icon = document.createElement('img');
     icon.src = faviconUrl(site.url);
@@ -50,4 +54,7 @@ chrome.topSites.get().then((sites) => {
     link.append(icon, label);
     nav.append(link);
   });
+}).catch((error) => {
+  // A missing topSites permission should cost you the tiles, not the console.
+  console.warn('[chrome-tmux] top sites unavailable:', error?.message ?? error);
 });
