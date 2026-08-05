@@ -1,11 +1,3 @@
-// Open spike. On a tab with no content script (chrome://, New Tab Page, Web
-// Store, PDF viewer) nothing can capture the key after the prefix. The
-// candidate fallback is hosting it in the action popup. Whether
-// chrome.action.openPopup() is allowed from a command handler is undocumented,
-// so this arms the test on exactly the pages the fallback is meant to fix.
-// Flip to false once the answer is known.
-const SPIKE_OPEN_POPUP = true;
-
 const tabKey = (tabId) => `tab:${tabId}`;
 
 async function getState(tabId) {
@@ -71,17 +63,6 @@ chrome.runtime.onInstalled.addListener(async () => {
   );
 });
 
-async function tryOpenPopup(where) {
-  try {
-    await chrome.action.openPopup();
-    console.log(`[chrome-tmux] openPopup succeeded from ${where}`);
-    return true;
-  } catch (error) {
-    console.warn(`[chrome-tmux] openPopup failed from ${where}:`, error?.message ?? error);
-    return false;
-  }
-}
-
 /* Last-active tab per window, for `prefix l`. */
 
 async function recordActivation(windowId, tabId) {
@@ -124,15 +105,13 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
 
   await setState(target.id, { ...state, armedAt: Date.now() });
 
-  let delivered = await send(target.id, { type: 'armed' });
+  const delivered = await send(target.id, { type: 'armed' });
 
+  // A tab that was already open when the extension loaded has nothing
+  // listening yet. Anywhere else, there is genuinely no content script and
+  // nothing can catch the next key.
   if (delivered === null && (await ensureContentScript(target.id, target.url))) {
-    delivered = await send(target.id, { type: 'armed' });
-  }
-
-  if (delivered === null && SPIKE_OPEN_POPUP) {
-    // Genuine dead zone. This is the only place the fallback can be tested.
-    await tryOpenPopup('a tab with no content script');
+    await send(target.id, { type: 'armed' });
   }
 });
 
@@ -209,10 +188,6 @@ async function runPrefixAction(key, tab, state) {
 
     case 'v':
       return { ...state, mode: state.mode === 'vim' ? 'off' : 'vim' };
-
-    case '?':
-      await tryOpenPopup('a content script message');
-      return state;
 
     default: {
       if (/^[1-9]$/.test(key)) {

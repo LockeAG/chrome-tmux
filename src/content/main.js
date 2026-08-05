@@ -16,7 +16,6 @@
   // A previous instance may still be here: injected twice, or orphaned by an
   // extension reload. Either way, retire it and take over.
   globalThis.__CHROME_TMUX__?.retire?.();
-  globalThis.__SIMPLE_VIM__?.retire?.(); // pre-rename symbol, drop later
 
   const SCROLL_STEP = 64;
   const UI = globalThis.SV_UI;
