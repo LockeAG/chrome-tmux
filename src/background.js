@@ -65,15 +65,33 @@ chrome.runtime.onInstalled.addListener(async () => {
 
 /* Last-active tab per window, for the `b` / `l` toggle. */
 
-async function recordActivation(windowId, tabId) {
-  const { lastActive = {} } = await chrome.storage.session.get('lastActive');
-  const entry = lastActive[windowId] ?? {};
-  if (entry.current === tabId) return;
-  lastActive[windowId] = { previous: entry.current ?? null, current: tabId };
-  await chrome.storage.session.set({ lastActive });
+// Every read-modify-write of lastActive goes through one chain. Without it,
+// the seed below can write a whole stale map on top of a real tab switch that
+// landed between its own read and write, and the toggle sends you to the wrong
+// tab from then on.
+let lastActiveWrites = Promise.resolve();
+
+function editLastActive(edit) {
+  lastActiveWrites = lastActiveWrites
+    .then(async () => {
+      const { lastActive = {} } = await chrome.storage.session.get('lastActive');
+      if (edit(lastActive)) await chrome.storage.session.set({ lastActive });
+    })
+    .catch(() => {});
+  return lastActiveWrites;
+}
+
+function recordActivation(windowId, tabId) {
+  return editLastActive((lastActive) => {
+    const entry = lastActive[windowId] ?? {};
+    if (entry.current === tabId) return false;
+    lastActive[windowId] = { previous: entry.current ?? null, current: tabId };
+    return true;
+  });
 }
 
 async function previousTab(windowId) {
+  await lastActiveWrites;
   const { lastActive = {} } = await chrome.storage.session.get('lastActive');
   return lastActive[windowId]?.previous ?? null;
 }
@@ -88,49 +106,21 @@ chrome.tabs.onActivated.addListener(({ tabId, windowId }) => {
 // worker spins up, and defers to any real activation already recorded.
 async function seedActivation() {
   const active = await chrome.tabs.query({ active: true });
-  const { lastActive = {} } = await chrome.storage.session.get('lastActive');
-  let changed = false;
-  for (const tab of active) {
-    if (tab.id === undefined || lastActive[tab.windowId]) continue;
-    lastActive[tab.windowId] = { previous: null, current: tab.id };
-    changed = true;
-  }
-  if (changed) await chrome.storage.session.set({ lastActive });
+  await editLastActive((lastActive) => {
+    let changed = false;
+    for (const tab of active) {
+      if (tab.id === undefined || lastActive[tab.windowId]) continue;
+      lastActive[tab.windowId] = { previous: null, current: tab.id };
+      changed = true;
+    }
+    return changed;
+  });
 }
 
 seedActivation();
 
 chrome.tabs.onRemoved.addListener((tabId) => {
   chrome.storage.session.remove(tabKey(tabId));
-});
-
-/* Prefix */
-
-chrome.commands.onCommand.addListener(async (command, tab) => {
-  if (command !== 'prefix') return;
-  const target = tab ?? (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
-  if (!target?.id) return;
-
-  const state = await getState(target.id);
-
-  if (state.armedAt) {
-    // Second prefix press. Chrome swallowed the key at browser level, so the
-    // page never saw it. Hand the passthrough to the content script.
-    await setState(target.id, { ...state, armedAt: null });
-    send(target.id, { type: 'passthrough' });
-    return;
-  }
-
-  await setState(target.id, { ...state, armedAt: Date.now() });
-
-  const delivered = await send(target.id, { type: 'armed' });
-
-  // A tab that was already open when the extension loaded has nothing
-  // listening yet. Anywhere else, there is genuinely no content script and
-  // nothing can catch the next key.
-  if (delivered === null && (await ensureContentScript(target.id, target.url))) {
-    await send(target.id, { type: 'armed' });
-  }
 });
 
 /* Prefix actions */

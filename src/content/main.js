@@ -5,9 +5,8 @@
    vim  --(C-a v|Esc)-> off
    vim  --(C-a)-------> armed --(key)--> vim
 
-   The prefix is caught here, in the page. On pages where no content script
-   runs, chrome.commands catches it instead and the service worker tells us we
-   are armed. Only one of those paths is ever live for a given key press.
+   The prefix is caught here, in the page. There is no browser-level shortcut:
+   binding one would make Chrome swallow Ctrl-A before any page could see it.
 
    Wrapped in an IIFE because the service worker may inject this file into a
    tab that already has it. Re-running bare top-level `const` would throw. */
@@ -208,10 +207,8 @@
 
   const MODIFIERS = new Set(['Shift', 'Control', 'Alt', 'Meta', 'CapsLock']);
 
-  // Control-A is not a macOS menu accelerator, so unlike Command shortcuts the
-  // page can claim it. That makes chrome.commands optional here: it only
-  // matters on pages where no content script runs. Whichever path is live, only
-  // one of them ever sees the key, so they cannot both fire.
+  // Control-A is not a macOS menu accelerator, so unlike a Command shortcut the
+  // page can claim it before anything else does.
   function isPrefix(event) {
     return event.ctrlKey && !event.metaKey && !event.altKey && event.key.toLowerCase() === 'a';
   }
@@ -306,17 +303,6 @@
     // no content script, which is how it knows to inject one.
     sendResponse({ ok: true });
     switch (message.type) {
-      case 'armed':
-        setArmed(true);
-        break;
-      case 'passthrough':
-        setArmed(false);
-        moveToLineStart();
-        break;
-      case 'mode':
-        setArmed(false);
-        setMode(message.mode);
-        break;
       case 'switcher':
         setArmed(false);
         UI.openSwitcher(message, (tabId) => send({ type: 'pick', tabId }));

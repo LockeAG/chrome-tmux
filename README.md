@@ -122,7 +122,10 @@ you, click once on the page.
 ## Where it still does not work
 
 `chrome://` pages, the Web Store, and the PDF viewer. Same rule, and there is
-no way round it there, because you cannot bring your own version of those.
+no way round it there, because you cannot bring your own version of those. Do
+not try to reach them by binding a browser-level shortcut either: that makes
+Chrome swallow `Ctrl-A` everywhere and breaks the prefix on the pages where it
+does work.
 
 The address bar is the other one. If your cursor is in the omnibox, the keys
 belong to Chrome, not to the page.

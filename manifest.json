@@ -35,10 +35,5 @@
       "run_at": "document_start",
       "all_frames": false
     }
-  ],
-  "commands": {
-    "prefix": {
-      "description": "Prefix (only needed on chrome:// pages)"
-    }
-  }
+  ]
 }
