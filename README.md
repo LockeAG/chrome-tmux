@@ -42,6 +42,10 @@ itself into them rather than making you reload everything.
 
 ## What it looks like
 
+`Ctrl-A` then `Ctrl-O`, then type. Every tab in every window, filtered as you go:
+
+![The tab tree](assets/store/screenshot-02.png)
+
 `Ctrl-A` then `?`. Every key, drawn in the page, without leaving it:
 
 ![The help overlay](assets/store/screenshot-01.png)
@@ -192,6 +196,10 @@ node tools/make-promo.cjs <capture-of-tools/promo.html> assets/store
 `tools/promo.html` is the cover art. Serve it, capture it at any window size,
 and `make-promo.cjs` cuts it into the cover, the small tile and the marquee. The
 page is flat and centred so the padding never shows a seam.
+
+## Changelog
+
+[CHANGELOG.md](CHANGELOG.md).
 
 ## Licence
 
