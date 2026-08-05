@@ -1,4 +1,4 @@
-import { isCall } from './calls.mjs';
+import { isCall } from './calls.js';
 
 const tabKey = (tabId) => `tab:${tabId}`;
 

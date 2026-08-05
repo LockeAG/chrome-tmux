@@ -106,7 +106,7 @@ cycle if you are in more than one.
 Recognised by the shape of the URL, so a meeting counts but a landing page does
 not. Covered: Google Meet, Zoom, Teams, Webex, Amazon Chime, GoTo Meeting,
 BlueJeans, Skype, Jitsi, Around and Gather. The list is one array in
-`src/calls.mjs`, with a test beside it.
+`src/calls.js`, with a test beside it.
 
 Discord and Slack are deliberately absent. Joining a voice channel or a huddle
 does not change the URL, so any pattern would flag every channel and every
@@ -188,13 +188,13 @@ Everything in `assets/store/` is generated, at Chrome Web Store sizes, on the
 Tokyo Night background:
 
 ```fish
-node tools/make-icons.js icons
-node tools/make-store-shots.js ~/Desktop/Chrome-Tmux assets/store
-node tools/make-promo.js <capture-of-tools/promo.html> assets/store
+node tools/make-icons.cjs icons
+node tools/make-store-shots.cjs ~/Desktop/Chrome-Tmux assets/store
+node tools/make-promo.cjs <capture-of-tools/promo.html> assets/store
 ```
 
 `tools/promo.html` is the cover art. Serve it, capture it at any window size,
-and `make-promo.js` cuts it into the cover, the small tile and the marquee. The
+and `make-promo.cjs` cuts it into the cover, the small tile and the marquee. The
 page is flat and centred so the padding never shows a seam.
 
 ## Licence

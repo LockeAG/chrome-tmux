@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { isCall } from '../src/calls.mjs';
+import { isCall } from '../src/calls.js';
 
 // A real meeting URL for each provider we claim to support.
 const CALLS = [
