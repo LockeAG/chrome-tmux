@@ -319,9 +319,9 @@ globalThis.SV_UI = (() => {
     ['Prefix', [
       ['C-a C-o / o / w', 'tab tree, searchable across every window'],
       ['C-a s', 'the same tree, collapsed to windows'],
-      ['C-a b / p', 'previous tab in order'],
+      ['C-a b / l', 'toggle to the last tab you were on'],
+      ['C-a p', 'previous tab in order'],
       ['C-a n', 'next tab in order'],
-      ['C-a l', 'last tab you were on'],
       ['C-a 1-9', 'jump to tab by position'],
       ['C-a c', 'new tab'],
       ['C-a x', 'close tab'],

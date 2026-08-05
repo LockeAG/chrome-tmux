@@ -60,9 +60,9 @@ bottom-left corner while it waits. There is no timeout, same as tmux.
 | `Ctrl-A` `Ctrl-O` | the tab tree, searchable across every window |
 | `Ctrl-A` `o` or `w` | the same thing |
 | `Ctrl-A` `s` | the same tree, collapsed to just windows |
-| `Ctrl-A` `b` or `p` | previous tab |
-| `Ctrl-A` `n` | next tab |
-| `Ctrl-A` `l` | back to the last tab you were on |
+| `Ctrl-A` `b` or `l` | toggle back to the last tab you were on |
+| `Ctrl-A` `p` | previous tab in order |
+| `Ctrl-A` `n` | next tab in order |
 | `Ctrl-A` `1`-`9` | jump to a tab by position |
 | `Ctrl-A` `c` | new tab |
 | `Ctrl-A` `x` | close this tab |

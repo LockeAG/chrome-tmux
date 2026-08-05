@@ -63,7 +63,7 @@ chrome.runtime.onInstalled.addListener(async () => {
   );
 });
 
-/* Last-active tab per window, for `prefix l`. */
+/* Last-active tab per window, for the `b` / `l` toggle. */
 
 async function recordActivation(windowId, tabId) {
   const { lastActive = {} } = await chrome.storage.session.get('lastActive');
@@ -81,6 +81,24 @@ async function previousTab(windowId) {
 chrome.tabs.onActivated.addListener(({ tabId, windowId }) => {
   recordActivation(windowId, tabId);
 });
+
+// Without this, nothing is known about a window until you switch tabs twice:
+// the first switch records where you went but not where you came from, so the
+// first `C-a b` of a browser session does nothing. Runs whenever the service
+// worker spins up, and defers to any real activation already recorded.
+async function seedActivation() {
+  const active = await chrome.tabs.query({ active: true });
+  const { lastActive = {} } = await chrome.storage.session.get('lastActive');
+  let changed = false;
+  for (const tab of active) {
+    if (tab.id === undefined || lastActive[tab.windowId]) continue;
+    lastActive[tab.windowId] = { previous: null, current: tab.id };
+    changed = true;
+  }
+  if (changed) await chrome.storage.session.set({ lastActive });
+}
+
+seedActivation();
 
 chrome.tabs.onRemoved.addListener((tabId) => {
   chrome.storage.session.remove(tabKey(tabId));
@@ -163,6 +181,8 @@ async function runPrefixAction(key, tab, state) {
       });
       return state;
 
+    // tmux last-window: toggle between the two tabs you were last on.
+    case 'b':
     case 'l': {
       const previous = await previousTab(tab.windowId);
       if (previous !== null) await chrome.tabs.update(previous, { active: true }).catch(() => null);
@@ -173,7 +193,6 @@ async function runPrefixAction(key, tab, state) {
       await cycleTab(tab, 1);
       return state;
 
-    case 'b':
     case 'p':
       await cycleTab(tab, -1);
       return state;
