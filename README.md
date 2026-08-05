@@ -104,8 +104,17 @@ making sound. When you filter, call tabs are weighted so they stay near the top.
 cycle if you are in more than one.
 
 Recognised by the shape of the URL, so a meeting counts but a landing page does
-not: Google Meet, Zoom, Teams, Jitsi, Gather. The list is one array at
-the top of `src/background.js`.
+not. Covered: Google Meet, Zoom, Teams, Webex, Amazon Chime, GoTo Meeting,
+BlueJeans, Skype, Jitsi, Around and Gather. The list is one array in
+`src/calls.mjs`, with a test beside it.
+
+Discord and Slack are deliberately absent. Joining a voice channel or a huddle
+does not change the URL, so any pattern would flag every channel and every
+workspace you have open.
+
+Teams is the weak one. It only matches while you are on the join page, because
+once you are in the call it rewrites the URL to something with nothing reliable
+to match on. Guessing would cost false positives.
 
 ## The one annoying trade
 
@@ -160,6 +169,18 @@ restyle it.
 - Link hints skip anything inside an iframe.
 - Find uses `window.find`, which is old and unofficial. It works today.
 - No counts like `3j`, no marks.
+
+## Tests
+
+The URL patterns are the one part of this worth testing, because a wrong one
+either hides your call or hoists a pricing page above it.
+
+```fish
+npm test
+```
+
+Every supported provider has a real meeting URL in `test/calls.test.mjs`, and
+every near miss that has ever been a false positive is in there next to it.
 
 ## Building the images
 

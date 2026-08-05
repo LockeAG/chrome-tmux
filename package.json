@@ -1,0 +1,9 @@
+{
+  "name": "chrome-tmux",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A tmux-style prefix and a vim mode for Chrome.",
+  "scripts": {
+    "test": "node --test 'test/*.test.mjs'"
+  }
+}
