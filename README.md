@@ -118,12 +118,22 @@ takes focus back as it loads. If one ever ignores you, click it once.
 - `Ctrl-X` reports success as soon as Chrome accepts the close. A page that
   stops you leaving with a dialog can survive it and reappear in the list.
 
-## Privacy
+## Privacy and security
 
 No network requests, no remote code, no `eval`, nothing collected. It reads tab
 titles and URLs because that is what a tab switcher does, and they never leave
 your browser. The interface lives in a closed shadow root, so pages cannot read
-or restyle it.
+or restyle it. Full detail in [PRIVACY.md](PRIVACY.md).
+
+Two things it does on purpose, both the result of a security audit:
+
+- **Only real keystrokes count.** A page can dispatch keyboard events at will.
+  Without an `isTrusted` check any site you visited could arm the prefix and
+  close your tab or spawn tabs on its own. Synthetic events are ignored.
+- **The tab list shows a colour, not a favicon.** Loading each site's real icon
+  would put one request per open tab into the host page's resource timeline,
+  letting the page you are on read the hostnames of every tab you have open. The
+  colour is derived from the hostname, so nothing is fetched.
 
 ## Development
 

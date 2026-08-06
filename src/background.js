@@ -165,7 +165,6 @@ async function collectWindows() {
         index: t.index,
         title: t.title || t.url || '',
         url: t.url || '',
-        favIconUrl: t.favIconUrl || '',
         active: t.active,
         live: isCall(t.url),
         audible: Boolean(t.audible)

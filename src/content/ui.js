@@ -61,7 +61,11 @@ globalThis.SV_UI = (() => {
     .row[data-audible="true"] .dot { background: #9ece6a; }
     .row[data-active="true"] .title { color: #9ece6a; }
 
-    .icon { width: 16px; height: 16px; flex: none; border-radius: 3px; }
+    /* A colour derived from the hostname, not the site's favicon. Loading the
+       real one would put a request per open tab into the host page's resource
+       timeline, letting any page you visit read the hosts of every tab you
+       have open. */
+    .icon { width: 16px; height: 16px; flex: none; border-radius: 3px; opacity: .85; }
     .text { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
     .title { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .url { font-size: 11px; color: #565f89; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -155,6 +159,20 @@ globalThis.SV_UI = (() => {
     node.textContent = kind === 'armed' ? '-- PREFIX --' : '-- VIM --';
   }
 
+  /**
+   * A stable colour per host, so rows stay scannable without fetching anything.
+   * @param {string} url
+   */
+  function hostColour(url) {
+    let hash = 0;
+    try {
+      for (const ch of new URL(url).hostname) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+    } catch {
+      return 'hsl(220 12% 45%)';
+    }
+    return `hsl(${hash % 360} 45% 62%)`;
+  }
+
   /* Fuzzy match: subsequence, rewarding runs and word boundaries. */
 
   function score(query, text) {
@@ -220,7 +238,9 @@ globalThis.SV_UI = (() => {
             group: null,
             title: `Window · ${g.tabs.length} tab${g.tabs.length === 1 ? '' : 's'}`,
             url: active?.title ?? '',
-            favIconUrl: active?.favIconUrl ?? '',
+            // The subtitle here is a tab title, not a URL, so the colour needs
+            // its own source or every window row comes out the same grey.
+            colourKey: active?.url ?? '',
             active: g.focused
           };
         });
@@ -231,7 +251,7 @@ globalThis.SV_UI = (() => {
           group: `Window ${i + 1}${g.focused ? ' (current)' : ''}`,
           title: t.title,
           url: t.url,
-          favIconUrl: t.favIconUrl,
+          colourKey: t.url,
           active: t.id === activeTabId,
           live: Boolean(t.live),
           audible: Boolean(t.audible)
@@ -277,9 +297,8 @@ globalThis.SV_UI = (() => {
         row.dataset.active = String(item.active);
         row.dataset.live = String(Boolean(item.live));
         row.dataset.audible = String(Boolean(item.audible));
-        const icon = el('img', 'icon');
-        icon.src = item.favIconUrl || 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';
-        icon.onerror = () => icon.remove();
+        const icon = el('div', 'icon');
+        icon.style.background = hostColour(item.colourKey ?? item.url);
         const text = el('div', 'text');
         text.append(el('div', 'title', item.title), el('div', 'url', item.url));
         row.append(icon, text);

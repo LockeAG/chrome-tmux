@@ -5,6 +5,19 @@ loosely and [semantic versioning](https://semver.org/).
 
 ## Unreleased
 
+### Security
+
+- **Synthetic keyboard events are ignored.** The key handler did not check
+  `event.isTrusted`, so any page could dispatch a `Ctrl-A` and a following key
+  to run any prefix action: close the tab, spawn tabs, switch tabs, or turn vim
+  mode on, with no interaction from the user. Found by audit, and demonstrated.
+- **The tab list no longer loads remote favicons.** Each one was an `<img>`
+  request inside the host page's document, so a page could read
+  `performance.getEntriesByType('resource')` and harvest the hostnames of every
+  tab open in every window. Rows now show a colour derived from the hostname,
+  and favicon URLs are no longer sent to the page at all.
+- Added [PRIVACY.md](PRIVACY.md), required for a Chrome Web Store listing.
+
 ### Added
 
 - Type checking with `// @ts-check` and JSDoc, run by `npm test` via

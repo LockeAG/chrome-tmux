@@ -221,6 +221,11 @@
   }
 
   function onKeyDown(event) {
+    // Only real keystrokes. A page can dispatch KeyboardEvents at will, and
+    // without this it can arm the prefix and run any action, closing your tab
+    // or spawning tabs with no interaction from you. isTrusted cannot be faked.
+    if (!event.isTrusted) return;
+
     // An orphan must give the page its keys back rather than swallow them.
     if (!contextAlive()) {
       retire();
