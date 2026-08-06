@@ -1,7 +1,7 @@
 // @ts-check
-// chrome:// links cannot be opened by an <a href>, so route it through tabs.
-/** @type {HTMLElement} */ (document.getElementById('shortcuts')).addEventListener('click', (event) => {
+
+/** @type {HTMLElement} */ (document.getElementById('options')).addEventListener('click', (event) => {
   event.preventDefault();
-  chrome.tabs.create({ url: 'chrome://extensions/shortcuts' });
+  chrome.runtime.openOptionsPage();
   window.close();
 });

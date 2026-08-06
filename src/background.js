@@ -71,7 +71,7 @@ async function ensureContentScript(tabId, url) {
   try {
     await chrome.scripting.executeScript({
       target: { tabId },
-      files: ['src/content/ui.js', 'src/content/main.js']
+      files: ['src/content/settings.js', 'src/content/ui.js', 'src/content/main.js']
     });
     return true;
   } catch (error) {

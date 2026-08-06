@@ -20,6 +20,13 @@
 
   const SCROLL_STEP = 64;
   const UI = globalThis.SV_UI;
+  const CONFIG = globalThis.SV_SETTINGS;
+
+  let settings = CONFIG.defaults();
+  let prefix = CONFIG.platformPrefix();
+  // Assume disabled until the settings arrive, and stay that way if they never
+  // do. A site the user switched off must never fire because storage hiccupped.
+  let blocked = true;
 
   /** @type {'off' | 'vim'} */
   let mode = 'off';
@@ -46,6 +53,13 @@
     UI.closeFind();
     UI.closeHelp();
     UI.setIndicator(null);
+    try {
+      // Throws if the extension was reloaded out from under us, which is
+      // exactly when retire() runs, so it goes last and it goes in a try.
+      chrome.storage.onChanged.removeListener(onSettingsChanged);
+    } catch {
+      // nothing left to detach from
+    }
   }
 
   function send(message) {
@@ -215,9 +229,11 @@
   const MODIFIERS = new Set(['Shift', 'Control', 'Alt', 'Meta', 'CapsLock']);
 
   // Control-A is not a macOS menu accelerator, so unlike a Command shortcut the
-  // page can claim it before anything else does.
+  // page can claim it before anything else does. The combination is
+  // configurable, because Ctrl-A is select-all off macOS.
+  /** @param {KeyboardEvent} event */
   function isPrefix(event) {
-    return event.ctrlKey && !event.metaKey && !event.altKey && event.key.toLowerCase() === 'a';
+    return CONFIG.matches(prefix, event);
   }
 
   function onKeyDown(event) {
@@ -225,6 +241,9 @@
     // without this it can arm the prefix and run any action, closing your tab
     // or spawning tabs with no interaction from you. isTrusted cannot be faked.
     if (!event.isTrusted) return;
+
+    // Switched off for this site in the options page.
+    if (blocked) return;
 
     // An orphan must give the page its keys back rather than swallow them.
     if (!contextAlive()) {
@@ -316,6 +335,8 @@
     sendResponse({ ok: true });
     switch (message.type) {
       case 'switcher':
+        // A reply can still land after the site was added to the blocklist.
+        if (blocked) break;
         setArmed(false);
         UI.openSwitcher(
           message,
@@ -328,9 +349,73 @@
 
   /* Restore mode after a navigation kills this script. */
 
-  send({ type: 'ready' }).then((response) => {
-    if (response?.mode) setMode(response.mode);
-  });
+  // Later settings always win over an earlier in-flight read.
+  let settingsGeneration = 0;
+
+  /**
+   * @param {Settings | null} next null means storage could not be read, so
+   *   stay blocked rather than guess that nothing is on the list.
+   * @param {number} generation
+   */
+  function applySettings(next, generation) {
+    if (generation < settingsGeneration || retired) return;
+    settingsGeneration = generation;
+
+    if (!next) {
+      // Storage could not be read at all, so we cannot know whether this site
+      // is on the list. Stay out, and clean up as if it were.
+      blocked = true;
+      standDown();
+      return;
+    }
+
+    settings = next;
+    prefix = CONFIG.effectivePrefix(next);
+    blocked = CONFIG.disabledFor(next.disabled, location.hostname);
+
+    if (blocked) standDown();
+    else handshake();
+  }
+
+  /** Leave nothing behind on a site we do not serve. */
+  function standDown() {
+    UI.closeSwitcher();
+    UI.closeHints();
+    UI.closeFind();
+    UI.closeHelp();
+    UI.setIndicator(null);
+    armed = false;
+    mode = 'off';
+    // Tell the worker too, or the toolbar badge keeps claiming this tab is armed.
+    send({ type: 'setMode', mode: 'off' });
+  }
+
+  // The handshake has to wait for the settings, or a warm worker answers first
+  // and its reply is dropped while `blocked` is still true.
+  let greeted = false;
+
+  function handshake() {
+    if (greeted || blocked || retired) return;
+    greeted = true;
+    send({ type: 'ready' }).then((response) => {
+      if (blocked || retired) return;
+      if (response?.mode) setMode(response.mode);
+    });
+  }
+
+  function reload() {
+    const generation = ++settingsGeneration;
+    CONFIG.load().then((next) => applySettings(next, generation));
+  }
+
+  /** @param {{[key: string]: chrome.storage.StorageChange}} changes */
+  function onSettingsChanged(changes) {
+    if (!changes[CONFIG.KEY]) return;
+    reload();
+  }
+
+  chrome.storage.onChanged.addListener(onSettingsChanged);
+  reload();
 
   globalThis.__CHROME_TMUX__ = { retire };
   console.log('[chrome-tmux] content script ready');

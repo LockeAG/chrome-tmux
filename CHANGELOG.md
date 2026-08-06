@@ -20,6 +20,32 @@ loosely and [semantic versioning](https://semver.org/).
 
 ### Added
 
+- A settings page. The prefix is now rebindable: click the box, press the
+  combination. Plus a list of sites to stay out of, one host per line, with
+  `*.domain` wildcards. On those sites no key is intercepted at all.
+- The prefix defaults per machine rather than syncing: `Ctrl-A` on macOS,
+  `Alt-A` elsewhere, since `Ctrl-A` is select-all off macOS. It only syncs once
+  you set one deliberately, so saving a blocklist entry on a Mac cannot push
+  `Ctrl-A` to your PC.
+- The prefix is stored as a physical key (`KeyA`) rather than the character it
+  produces. On macOS, Option-A reports `å` and Option-E reports `Dead`, so a
+  character-based binding would match the wrong keys and break when synced.
+- Blocklist entries are normalised on save: a pasted URL, a port, a trailing
+  dot or an internationalised domain all reduce to the host the browser
+  actually reports, so a line cannot silently never match.
+- Settings survive a storage failure. A read error falls back to a local mirror
+  and, failing that, the extension stays inert rather than assuming the
+  blocklist is empty and firing on a site you switched off.
+- Keys Chrome keeps for itself, such as Ctrl-W and Ctrl-T, are refused as a
+  prefix. Chrome ignores `preventDefault` on those, so binding one would have
+  closed or opened a tab on every prefix press.
+- Patterns that parse but can never match, such as `*` or `.com`, are dropped
+  with a count in the save message rather than saved to match nothing.
+- Tests for all of it, including the cases that matter: `*.figma.com` must not
+  match `notfigma.com` or `figma.com.evil.com`, an exact host must not match its
+  parent, a trailing dot must not bypass the list, malformed synced data must
+  not throw on every keystroke, and sync answering "nothing stored" must be
+  authoritative over a stale local mirror.
 - Type checking with `// @ts-check` and JSDoc, run by `npm test` via
   `tsc --noEmit`. No build step: Chrome still loads the source as written, and
   TypeScript is a devDependency that never ships.
@@ -120,7 +146,7 @@ First tag. Load-unpacked only, no store listing.
 
 - `chrome://` pages, the Web Store and the PDF viewer. Chrome forbids content
   scripts there and there is no way round it.
-- No settings screen. The keymap lives in the source.
+- The keymap beyond the prefix is not configurable; it lives in the source.
 - `Ctrl-A` is select-all on Windows and Linux, so the default prefix is a poor
   fit outside macOS.
 - Link hints skip anything inside an iframe.

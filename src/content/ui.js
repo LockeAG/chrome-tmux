@@ -413,7 +413,8 @@ globalThis.SV_UI = (() => {
       ['C-a x', 'close tab'],
       ['C-a v', 'toggle vim mode'],
       ['C-a ?', 'this help'],
-      ['C-a C-a', 'move caret to line start']
+      ['C-a C-a', 'move caret to line start'],
+      ['', 'prefix and per-site opt-out live in the extension settings']
     ]],
     ['Vim mode', [
       ['h j k l', 'scroll'],

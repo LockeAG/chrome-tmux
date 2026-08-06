@@ -87,12 +87,24 @@ Recognised from the URL, so a meeting counts and a landing page does not. Meet,
 Zoom, Teams, Webex, Chime, GoTo, BlueJeans, Skype, Jitsi, Around, Gather. One
 array in `src/calls.js`, with a test beside it.
 
+## Settings
+
+Right-click the toolbar icon and pick Options, or open Settings from the popup.
+
+**Prefix.** Click the box and press what you want. The default is `Ctrl-A` on
+macOS and `Alt-A` everywhere else, because `Ctrl-A` is select-all on Windows
+and Linux. Settings sync with your Chrome profile.
+
+**Sites to stay out of.** One host per line. `mail.google.com` matches that
+host, `*.figma.com` matches the domain and everything under it. On those sites
+no key is intercepted at all, so Gmail and Docs keep their own shortcuts.
+
 ## The one annoying trade
 
-This takes `Ctrl-A` everywhere in Chrome, including inside text boxes, so on
-macOS you lose "jump to the start of the line". Press `Ctrl-A` twice to get it
-back, like `send-prefix` in tmux. The prefix is one line in
-`src/content/main.js` if the trade is not worth it.
+The prefix is taken everywhere in Chrome, including inside text boxes, so with
+the macOS default you lose "jump to the start of the line". Press the prefix
+twice to get it back, like `send-prefix` in tmux. Or rebind it, or switch it off
+for the sites where it gets in the way.
 
 ## The new tab
 
@@ -108,8 +120,7 @@ takes focus back as it loads. If one ever ignores you, click it once.
   Binding a browser-level shortcut makes it worse, not better: Chrome would then
   swallow `Ctrl-A` before any page sees it.
 - Keys in the omnibox belong to Chrome, not to the page.
-- No settings screen. The keymap lives in the source.
-- `Ctrl-A` is select-all on Windows and Linux. This was built for macOS.
+- The keymap beyond the prefix is not configurable; it lives in the source.
 - Link hints skip iframes. Find uses `window.find`, old and unofficial.
 - No counts like `3j`, no marks.
 - Teams only matches its join page; it rewrites the URL once you are in a call.
