@@ -44,6 +44,7 @@ it waits. No timeout, same as tmux.
 | `c` | new tab |
 | `x` | close this tab |
 | `v` | vim mode on or off |
+| `,` | settings |
 | `?` | show every key, in the page |
 | `Ctrl-A` | jump the caret to the start of the line |
 
@@ -89,7 +90,8 @@ array in `src/calls.js`, with a test beside it.
 
 ## Settings
 
-Right-click the toolbar icon and pick Options, or open Settings from the popup.
+`Ctrl-A` then `,`. Or right-click the toolbar icon and pick Options, or open
+Settings from the popup.
 
 **Prefix.** Click the box and press what you want. The default is `Ctrl-A` on
 macOS and `Alt-A` everywhere else, because `Ctrl-A` is select-all on Windows

@@ -20,6 +20,8 @@ loosely and [semantic versioning](https://semver.org/).
 
 ### Added
 
+- `C-a ,` opens the settings page, following the macOS convention that comma is
+  preferences.
 - A settings page. The prefix is now rebindable: click the box, press the
   combination. Plus a list of sites to stay out of, one host per line, with
   `*.domain` wildcards. On those sites no key is intercepted at all.

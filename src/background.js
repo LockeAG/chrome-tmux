@@ -243,6 +243,11 @@ async function runPrefixAction(key, tab, state) {
     case 'v':
       return { ...state, mode: state.mode === 'vim' ? 'off' : 'vim' };
 
+    // Comma is settings nearly everywhere on macOS.
+    case ',':
+      chrome.runtime.openOptionsPage();
+      return state;
+
     default: {
       if (/^[1-9]$/.test(key)) {
         const tabs = await chrome.tabs.query({ windowId: tab.windowId });
