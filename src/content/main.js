@@ -1,3 +1,5 @@
+// @ts-check
+
 /* Key capture and the mode machine.
 
    off  --(C-a)-------> armed --(key)--> off
@@ -19,9 +21,13 @@
   const SCROLL_STEP = 64;
   const UI = globalThis.SV_UI;
 
+  /** @type {'off' | 'vim'} */
   let mode = 'off';
   let armed = false;
   let pendingG = false;
+  // Deliberately untyped: the DOM lib and Node's types disagree about what a
+  // timer handle is, and the handle is only ever passed straight back.
+  /** @type {any} */
   let gTimer = null;
   let retired = false;
 
@@ -80,10 +86,11 @@
 
   /* Focus */
 
+  /** @returns {HTMLElement | null} */
   function deepActiveElement() {
     let node = document.activeElement;
     while (node?.shadowRoot?.activeElement) node = node.shadowRoot.activeElement;
-    return node;
+    return /** @type {HTMLElement | null} */ (node);
   }
 
   const NON_TEXT_INPUTS = new Set([
@@ -106,7 +113,7 @@
     const node = deepActiveElement();
     if (!node) return;
 
-    if (node.tagName === 'INPUT' || node.tagName === 'TEXTAREA') {
+    if (node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement) {
       try {
         const caret = node.selectionStart ?? 0;
         const newline = node.value.lastIndexOf('\n', caret - 1);

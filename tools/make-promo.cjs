@@ -30,10 +30,10 @@ const sips = (args) => execFileSync('/usr/bin/sips', args, { encoding: 'utf8' })
 
 function dimensions(file) {
   const out = sips(['-g', 'pixelWidth', '-g', 'pixelHeight', file]);
-  return {
-    width: Number(out.match(/pixelWidth:\s*(\d+)/)[1]),
-    height: Number(out.match(/pixelHeight:\s*(\d+)/)[1])
-  };
+  const width = out.match(/pixelWidth:\s*(\d+)/);
+  const height = out.match(/pixelHeight:\s*(\d+)/);
+  if (!width || !height) throw new Error(`sips gave no dimensions for ${file}`);
+  return { width: Number(width[1]), height: Number(height[1]) };
 }
 
 fs.mkdirSync(OUT, { recursive: true });

@@ -5,6 +5,20 @@ loosely and [semantic versioning](https://semver.org/).
 
 ## Unreleased
 
+### Added
+
+- Type checking with `// @ts-check` and JSDoc, run by `npm test` via
+  `tsc --noEmit`. No build step: Chrome still loads the source as written, and
+  TypeScript is a devDependency that never ships.
+
+### Fixed
+
+- `chrome.windows.getAll` types its tab list as optional, so a window without
+  one would have thrown while building the tab tree.
+- `chrome.tabs.remove` was called with a possibly undefined tab id.
+- The screenshot scripts threw an unhelpful error if `sips` returned no
+  dimensions; they now say which file failed.
+
 ### Changed
 
 - Screenshots are captured with the page zoomed, so the interface is physically

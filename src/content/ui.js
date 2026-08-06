@@ -1,3 +1,5 @@
+// @ts-check
+
 /* Shadow-root UI: mode indicator, tab switcher, link hints, find bar.
    Styles go through a constructable stylesheet so a strict page CSP cannot
    block them the way it blocks an injected <style> element. */
@@ -102,9 +104,12 @@ globalThis.SV_UI = (() => {
     .findbar[data-miss="true"] input { color: #f7768e; }
   `;
 
+  /** @type {HTMLDivElement | null} */
   let host = null;
+  /** @type {ShadowRoot | null} */
   let root = null;
 
+  /** @returns {ShadowRoot} */
   function ensureRoot() {
     if (root && host?.isConnected) return root;
     // Drop a host left behind by an earlier instance of this script.
@@ -123,6 +128,12 @@ globalThis.SV_UI = (() => {
     return root;
   }
 
+  /**
+   * @param {string} tag
+   * @param {string | null} [className]
+   * @param {string} [text]
+   * @returns {any} the caller knows which element it asked for
+   */
   function el(tag, className, text) {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -165,6 +176,7 @@ globalThis.SV_UI = (() => {
 
   /* Tab switcher */
 
+  /** @type {{ scrim: HTMLElement, token: object } | null} */
   let switcher = null;
 
   function closeSwitcher() {
@@ -368,6 +380,7 @@ globalThis.SV_UI = (() => {
 
   /* Help */
 
+  /** @type {Array<[string, Array<[string, string]>]>} */
   const KEYMAP = [
     ['Prefix', [
       ['C-a C-o / o / w', 'tab tree, searchable across every window'],
@@ -403,6 +416,7 @@ globalThis.SV_UI = (() => {
     ]]
   ];
 
+  /** @type {{ scrim: HTMLElement } | null} */
   let help = null;
 
   function closeHelp() {
@@ -454,6 +468,7 @@ globalThis.SV_UI = (() => {
     '[tabindex]:not([tabindex="-1"])'
   ].join(',');
 
+  /** @type {{ nodes: Array<{ element: Element, marker: HTMLElement, label: string }>, typed: string, onActivate: (element: Element) => void } | null} */
   let hints = null;
 
   function closeHints() {
@@ -541,6 +556,7 @@ globalThis.SV_UI = (() => {
 
   /* Find bar, backed by Chrome's window.find */
 
+  /** @type {{ node: HTMLElement, input: HTMLInputElement } | null} */
   let findbar = null;
   let lastTerm = '';
 
@@ -548,7 +564,8 @@ globalThis.SV_UI = (() => {
   // inside a capture-phase keydown listener, which is the worst place for one.
   function find(term, backwards) {
     try {
-      return window.find(term, false, backwards, true, false, false, false);
+      // window.find is non-standard and absent from the DOM lib types.
+      return /** @type {any} */ (window).find(term, false, backwards, true, false, false, false);
     } catch {
       return false;
     }

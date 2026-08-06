@@ -1,3 +1,4 @@
+// @ts-check
 // Which tabs count as a live call, decided from the URL alone.
 //
 // Every pattern matches a meeting path AND something room-shaped after it.

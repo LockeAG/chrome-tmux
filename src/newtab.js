@@ -1,4 +1,5 @@
-const search = document.getElementById('q');
+// @ts-check
+const search = /** @type {HTMLInputElement} */ (document.getElementById('q'));
 
 // Chrome parks focus in the omnibox when an extension overrides the New Tab
 // Page, and it does so around load rather than before it. A single focus()
@@ -38,7 +39,7 @@ function faviconUrl(pageUrl) {
 }
 
 chrome.topSites.get().then((sites) => {
-  const nav = document.getElementById('sites');
+  const nav = /** @type {HTMLElement} */ (document.getElementById('sites'));
   sites.slice(0, 12).forEach((site) => {
     const link = document.createElement('a');
     link.href = site.url;

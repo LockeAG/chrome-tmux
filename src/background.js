@@ -1,19 +1,45 @@
+// @ts-check
 import { isCall } from './calls.js';
+
+/**
+ * Last-active tabs per window, held in chrome.storage.session.
+ * @typedef {Record<string, { previous: number | null, current: number }>} LastActive
+ */
+
+/**
+ * Per-tab state, held in chrome.storage.session.
+ * @typedef {object} TabState
+ * @property {'off' | 'vim'} mode
+ * @property {number | null} armedAt
+ * @property {boolean} [closed] set when the action removed the tab
+ */
 
 const tabKey = (tabId) => `tab:${tabId}`;
 
+/**
+ * @param {number} tabId
+ * @returns {Promise<TabState>}
+ */
 async function getState(tabId) {
   const key = tabKey(tabId);
   const store = await chrome.storage.session.get(key);
-  return store[key] ?? { mode: 'off', armedAt: null };
+  return /** @type {TabState | undefined} */ (store[key]) ?? { mode: 'off', armedAt: null };
 }
 
+/**
+ * @param {number} tabId
+ * @param {TabState} state
+ */
 async function setState(tabId, state) {
   await chrome.storage.session.set({ [tabKey(tabId)]: state });
   await paintBadge(tabId, state);
   return state;
 }
 
+/**
+ * @param {number} tabId
+ * @param {TabState} state
+ */
 async function paintBadge(tabId, state) {
   const armed = Boolean(state.armedAt);
   const text = armed ? '^A' : state.mode === 'vim' ? 'V' : '';
@@ -77,7 +103,7 @@ function editLastActive(edit) {
   lastActiveWrites = lastActiveWrites
     .then(async () => {
       const { lastActive = {} } = await chrome.storage.session.get('lastActive');
-      if (edit(lastActive)) await chrome.storage.session.set({ lastActive });
+      if (edit(/** @type {LastActive} */ (lastActive))) await chrome.storage.session.set({ lastActive });
     })
     .catch(() => {});
   return lastActiveWrites;
@@ -95,7 +121,7 @@ function recordActivation(windowId, tabId) {
 async function previousTab(windowId) {
   await lastActiveWrites;
   const { lastActive = {} } = await chrome.storage.session.get('lastActive');
-  return lastActive[windowId]?.previous ?? null;
+  return /** @type {LastActive} */ (lastActive)[windowId]?.previous ?? null;
 }
 
 chrome.tabs.onActivated.addListener(({ tabId, windowId }) => {
@@ -134,7 +160,7 @@ async function collectWindows() {
     .map((w) => ({
       windowId: w.id,
       focused: w.focused,
-      tabs: w.tabs.map((t) => ({
+      tabs: (w.tabs ?? []).map((t) => ({
         id: t.id,
         index: t.index,
         title: t.title || t.url || '',
@@ -160,6 +186,12 @@ async function focusTab(tabId) {
   await chrome.windows.update(tab.windowId, { focused: true });
 }
 
+/**
+ * @param {string} key
+ * @param {chrome.tabs.Tab} tab
+ * @param {TabState} state
+ * @returns {Promise<TabState>}
+ */
 async function runPrefixAction(key, tab, state) {
   switch (key) {
     // `o` mirrors the tmux session picker on C-a C-o. Ctrl+O reaches here as
@@ -206,7 +238,7 @@ async function runPrefixAction(key, tab, state) {
       return state;
 
     case 'x':
-      await chrome.tabs.remove(tab.id);
+      if (tab.id !== undefined) await chrome.tabs.remove(tab.id);
       return { ...state, closed: true };
 
     case 'v':

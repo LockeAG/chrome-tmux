@@ -4,7 +4,9 @@
 
 Drive Chrome the way you drive tmux. Hit `Ctrl-A`, then a letter.
 
-No build step, no dependencies, no network calls.
+No build step, no runtime dependencies, no network calls. Chrome loads the
+source as written. Types are checked with `// @ts-check` and JSDoc, so there is
+nothing to compile.
 
 **The prefix owns containers. Vim mode owns the page.** A Chrome tab is a tmux
 window, a Chrome window is a tmux session, so `Ctrl-A w` lists your tabs the way
@@ -126,7 +128,8 @@ or restyle it.
 ## Development
 
 ```fish
-npm test                                           # call URL patterns
+npm test                                           # typecheck + call URL patterns
+npm run typecheck                                  # types only
 node tools/make-icons.cjs icons                    # extension icons
 node tools/make-store-shots.cjs <src> assets/store
 node tools/make-promo.cjs <capture> assets/store
