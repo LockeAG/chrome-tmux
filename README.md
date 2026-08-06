@@ -99,7 +99,13 @@ and Linux. Settings sync with your Chrome profile.
 
 **Sites to stay out of.** One host per line. `mail.google.com` matches that
 host, `*.figma.com` matches the domain and everything under it. On those sites
-no key is intercepted at all, so Gmail and Docs keep their own shortcuts.
+no key is intercepted at all.
+
+It ships with a starting list, because a spreadsheet needs `Ctrl-A` more than a
+tab switcher does: Gmail, Google Docs, Office on the web and SharePoint,
+Overleaf, Notion, Figma, Slack, and the two browser editors, `vscode.dev` and
+`github.dev`. They are shown in the box, not hidden, so delete any you disagree
+with. Empty the list entirely and it stays empty.
 
 ## The one annoying trade
 

@@ -43,6 +43,30 @@ test('an unset prefix is not stored, so it stays per-machine', () => {
   assert.deepEqual(S.effectivePrefix(S.defaults()), S.platformPrefix());
 });
 
+test('every shipped default is a host the matcher can actually use', () => {
+  const S = loadSettings();
+  for (const pattern of S.DEFAULT_DISABLED) {
+    assert.equal(S.normaliseHost(pattern), pattern, `default must survive normalising: ${pattern}`);
+  }
+  // Spot-check that they do what the list claims.
+  const list = S.defaults().disabled;
+  assert.equal(S.disabledFor(list, 'docs.google.com'), true);
+  assert.equal(S.disabledFor(list, 'excel.officeapps.live.com'), true);
+  assert.equal(S.disabledFor(list, 'acme.sharepoint.com'), true);
+  assert.equal(S.disabledFor(list, 'www.notion.so'), true);
+  assert.equal(S.disabledFor(list, 'github.com'), false, 'must not swallow ordinary sites');
+  assert.equal(S.disabledFor(list, 'news.ycombinator.com'), false);
+});
+
+test('deleting every default sticks, rather than reappearing', async () => {
+  const stored = { settings: { prefix: null, disabled: [] } };
+  const S = loadSettings({
+    sync: { get: async () => stored, set: async () => {} },
+    local: { get: async () => ({}), set: async () => {} }
+  });
+  assert.deepEqual((await S.load()).disabled, [], 'an explicit empty list is respected');
+});
+
 test('the prefix matches modifiers exactly', () => {
   const S = loadSettings();
   const prefix = { ctrl: true, alt: false, shift: false, meta: false, code: 'KeyA' };
@@ -122,7 +146,7 @@ test('keys Chrome keeps for itself cannot be bound', () => {
 test('sync answering "nothing stored" is authoritative over a stale mirror', async () => {
   const stale = { get: async () => ({ settings: { disabled: ['deleted.com'] } }), set: async () => {} };
   const S = loadSettings({ sync: { get: async () => ({}), set: async () => {} }, local: stale });
-  assert.deepEqual((await S.load()).disabled, [], 'a deleted entry must not come back');
+  assert.deepEqual((await S.load()).disabled, S.defaults().disabled, 'the mirror must not win');
 });
 
 test('a storage failure keeps the blocklist rather than assuming it is empty', async () => {

@@ -42,9 +42,27 @@ globalThis.SV_SETTINGS = (() => {
       : { ctrl: false, alt: true, shift: false, meta: false, code: 'KeyA' };
   }
 
+  // Apps where the browser's own editing matters more than a prefix. Documents,
+  // spreadsheets and mail all use Ctrl-A for select-all, and the rest capture
+  // single keys of their own. These are shown in the settings and can be
+  // deleted: they are a starting point, not a policy.
+  const DEFAULT_DISABLED = [
+    'mail.google.com',
+    'docs.google.com',
+    '*.officeapps.live.com',
+    '*.sharepoint.com',
+    '*.office.com',
+    '*.overleaf.com',
+    '*.notion.so',
+    '*.figma.com',
+    'app.slack.com',
+    'vscode.dev',
+    'github.dev'
+  ];
+
   /** @returns {Settings} */
   function defaults() {
-    return { prefix: null, disabled: [] };
+    return { prefix: null, disabled: [...DEFAULT_DISABLED] };
   }
 
   /** @param {Settings} settings @returns {Prefix} */
@@ -238,7 +256,7 @@ globalThis.SV_SETTINGS = (() => {
   }
 
   return {
-    KEY, defaults, normalise, normaliseHost, platformPrefix, effectivePrefix,
+    KEY, DEFAULT_DISABLED, defaults, normalise, normaliseHost, platformPrefix, effectivePrefix,
     load, save, matches, disabledFor, label, fromEvent, isReserved, isMac
   };
 })();

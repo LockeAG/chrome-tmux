@@ -22,6 +22,11 @@ loosely and [semantic versioning](https://semver.org/).
 
 - `C-a ,` opens the settings page, following the macOS convention that comma is
   preferences.
+- The site list ships with sensible defaults rather than empty: Gmail, Google
+  Docs, Office on the web, SharePoint, Overleaf, Notion, Figma, Slack,
+  `vscode.dev` and `github.dev`. Documents and spreadsheets need `Ctrl-A` more
+  than a tab switcher does. They appear in the settings box rather than being
+  hidden, so any can be deleted, and emptying the list keeps it empty.
 - A settings page. The prefix is now rebindable: click the box, press the
   combination. Plus a list of sites to stay out of, one host per line, with
   `*.domain` wildcards. On those sites no key is intercepted at all.
