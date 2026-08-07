@@ -7,6 +7,9 @@ loosely and [semantic versioning](https://semver.org/).
 
 ### Added
 
+- CI on every push and pull request: types, unit tests and the browser smoke
+  suite, the last under a virtual display because an extension needs a real
+  browser. Failures upload the Playwright trace.
 - A browser smoke suite, `npm run smoke`. Playwright loads the extension into a
   real Chrome and checks what no unit test can: the service worker starts and
   stays up, the new tab, options and popup pages load every script they depend

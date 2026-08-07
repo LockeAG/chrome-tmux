@@ -1,5 +1,7 @@
 # chrome-tmux
 
+[![CI](https://github.com/LockeAG/chrome-tmux/actions/workflows/ci.yml/badge.svg)](https://github.com/LockeAG/chrome-tmux/actions/workflows/ci.yml)
+
 ![chrome-tmux](assets/store/cover.png)
 
 Drive Chrome the way you drive tmux. Hit `Ctrl-A`, then a letter.
