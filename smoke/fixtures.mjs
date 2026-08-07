@@ -52,6 +52,24 @@ export const test = base.extend({
 
   extensionId: async ({ worker }, use) => {
     await use(new URL(worker.url()).host);
+  },
+
+  /**
+   * Pin the prefix before any page opens. Left alone it follows the platform,
+   * Ctrl-A on macOS and Alt-A elsewhere, so a test that hardcodes one passes on
+   * the author's laptop and fails in CI. Setting it explicitly also checks that
+   * a stored prefix is honoured over the default.
+   */
+  prefix: async ({ worker }, use) => {
+    await worker.evaluate(() =>
+      chrome.storage.sync.set({
+        settings: {
+          prefix: { ctrl: true, alt: false, shift: false, meta: false, code: 'KeyA' },
+          disabled: []
+        }
+      })
+    );
+    await use('Control+a');
   }
 });
 

@@ -51,7 +51,18 @@ test('the popup loads and names the prefix', async ({ context, extensionId }) =>
   await expect(page.locator('#prefix')).not.toHaveText('…');
 });
 
-test('a real keystroke arms the prefix, end to end', async ({ context, worker, site }) => {
+test('an untouched prefix follows the platform', async ({ context, extensionId }) => {
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/src/options.html`);
+
+  // Ctrl-A is select-all off macOS, so the default must differ by platform.
+  // CI runs Linux and the author runs macOS, which is how this got noticed.
+  const expected = process.platform === 'darwin' ? 'Ctrl-A' : 'Alt-A';
+  await expect(page.locator('#prefix')).toHaveText(expected);
+  await expect(page.locator('#prefix-note')).toContainText('default for this platform');
+});
+
+test('a real keystroke arms the prefix, end to end', async ({ context, worker, site, prefix }) => {
   const page = await context.newPage();
   await page.goto(site);
   await page.locator('body').click();
@@ -61,11 +72,11 @@ test('a real keystroke arms the prefix, end to end', async ({ context, worker, s
 
   // Playwright presses keys through CDP, so these are trusted events. That is
   // the whole chain: content script, message to the worker, stored state.
-  await page.keyboard.press('Control+a');
+  await page.keyboard.press(prefix);
   await expect.poll(() => badge(worker, tabId)).toBe('^A');
 });
 
-test('a synthetic keystroke does not, because pages must not drive this', async ({ context, worker, site }) => {
+test('a synthetic keystroke does not, because pages must not drive this', async ({ context, worker, site, prefix }) => {
   const page = await context.newPage();
   await page.goto(site);
   await page.locator('body').click();
@@ -83,13 +94,13 @@ test('a synthetic keystroke does not, because pages must not drive this', async 
   expect(await badge(worker, tabId)).toBe('');
 });
 
-test('the prefix runs an action', async ({ context, worker, site }) => {
+test('the prefix runs an action', async ({ context, worker, site, prefix }) => {
   const page = await context.newPage();
   await page.goto(site);
   await page.locator('body').click();
 
   const before = await worker.evaluate(async () => (await chrome.tabs.query({})).length);
-  await page.keyboard.press('Control+a');
+  await page.keyboard.press(prefix);
   await page.keyboard.press('c');
 
   // `C-a c` opens a tab, which is observable without reaching into the closed
@@ -99,13 +110,13 @@ test('the prefix runs an action', async ({ context, worker, site }) => {
     .toBe(before + 1);
 });
 
-test('vim mode toggles and shows in the badge', async ({ context, worker, site }) => {
+test('vim mode toggles and shows in the badge', async ({ context, worker, site, prefix }) => {
   const page = await context.newPage();
   await page.goto(site);
   await page.locator('body').click();
   const tabId = await activeTabId(worker);
 
-  await page.keyboard.press('Control+a');
+  await page.keyboard.press(prefix);
   await page.keyboard.press('v');
   await expect.poll(() => badge(worker, tabId)).toBe('V');
 
@@ -113,7 +124,7 @@ test('vim mode toggles and shows in the badge', async ({ context, worker, site }
   await expect.poll(() => badge(worker, tabId)).toBe('');
 });
 
-test('adding a site to the blocklist makes it inert, live', async ({ context, worker, extensionId, site }) => {
+test('adding a site to the blocklist makes it inert, live', async ({ context, worker, extensionId, site, prefix }) => {
   const page = await context.newPage();
   await page.goto(site);
   await page.locator('body').click();
@@ -122,7 +133,7 @@ test('adding a site to the blocklist makes it inert, live', async ({ context, wo
   // Prove it works here first, or "inert" is indistinguishable from "the
   // content script never loaded", which is how the old version of this test
   // passed while proving nothing.
-  await page.keyboard.press('Control+a');
+  await page.keyboard.press(prefix);
   await expect.poll(() => badge(worker, tabId)).toBe('^A');
   await page.keyboard.press('Escape');
 
@@ -136,7 +147,7 @@ test('adding a site to the blocklist makes it inert, live', async ({ context, wo
   // No reload: the open tab must stand down on its own.
   await page.bringToFront();
   await page.locator('body').click();
-  await page.keyboard.press('Control+a');
+  await page.keyboard.press(prefix);
   await page.waitForTimeout(500);
   expect(await badge(worker, tabId)).toBe('');
 });
