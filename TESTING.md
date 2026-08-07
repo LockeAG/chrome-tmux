@@ -61,7 +61,7 @@ With a call open, for example a real Google Meet:
 - [ ] **Type immediately without clicking.** The text lands in the search box
 - [ ] The footer names your actual prefix
 - [ ] The tiles show your most visited sites, with real favicons
-- [ ] Searching goes to Google
+- [ ] Searching goes to your chosen engine
 - [ ] `Ctrl-A` then `o` works here, without clicking first
 
 > This page shipped completely dead once, because a script tag was missing.
@@ -77,6 +77,15 @@ With a call open, for example a real Google Meet:
 - [ ] Try `Ctrl-W`. It refuses, rather than binding something that closes tabs
 - [ ] Save, then check on a page that `Ctrl-;` arms the prefix and `Ctrl-A` does not
 - [ ] **Reset to defaults**, confirm the prefix returns to `Ctrl-A`
+
+Search engine:
+
+- [ ] Pick DuckDuckGo, save, open a new tab. The placeholder says
+      *Search DuckDuckGo* and a query goes there
+- [ ] Pick **Custom**, enter `https://example.com/?q=%s`, save, search, and
+      check the URL
+- [ ] Pick Custom, enter something with no `%s`, save. It says so and keeps the
+      previous engine
 
 Blocklist:
 
@@ -105,11 +114,17 @@ Blocklist:
 
 ## Keyboard layout
 
-Skip if you only ever use one Latin layout. **Known broken**, so this is
-confirmation rather than discovery.
+This was broken until recently, and it is the hardest thing here to reason
+about, so it is worth ten minutes with a second input source added in System
+Settings.
 
-- [ ] Add a Russian or French input source, switch to it, press the prefix and
-      then `w`. Expect: nothing happens
+- [ ] Switch to **French (AZERTY)**. The prefix still fires on the key labelled
+      `A`, not the one where QWERTY puts it
+- [ ] Still on AZERTY, the prefix then `w` opens the tab tree, since `w` is
+      where the keycap says
+- [ ] Switch to **Russian**. The prefix fires on the key where `A` sits
+- [ ] Still on Russian, the prefix then the key marked `W` opens the tab tree.
+      It produces `ц`, and the extension falls back to the physical key
 
 ## What to report
 
