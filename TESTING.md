@@ -10,6 +10,9 @@ says, since later steps often depend on earlier ones.
 ## Setup
 
 - [ ] `chrome://extensions`, Developer mode on, **Load unpacked**, pick this folder
+- [ ] **The card shows the version you expect.** If it does not, you are testing
+      an old build and everything below is meaningless. The version is also in
+      the popup, the settings page and the `C-a ?` footer
 - [ ] The card shows no **Errors** button
 - [ ] Click **service worker** and check the console is clean
 

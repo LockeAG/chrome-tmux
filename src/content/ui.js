@@ -498,7 +498,8 @@ globalThis.SV_UI = (() => {
       body.append(section);
     });
 
-    panel.append(body, el('div', 'footer', 'any key closes'));
+    const version = chrome.runtime.getManifest().version;
+    panel.append(body, el('div', 'footer', `any key closes · v${version}`));
     scrim.append(panel);
     r.append(scrim);
 

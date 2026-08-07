@@ -41,6 +41,14 @@ test('the options page loads and resolves the prefix', async ({ context, extensi
   expect(await page.locator('#disabled').inputValue()).toContain('mail.google.com');
 });
 
+test('the UI shows which build is loaded', async ({ context, extensionId }) => {
+  // Telling a stale build from a real bug has cost this project several rounds.
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/src/options.html`);
+  const shown = await page.locator('#version').textContent();
+  expect(shown).toMatch(/^v\d+\.\d+\.\d+$/);
+});
+
 test('the popup loads and names the prefix', async ({ context, extensionId }) => {
   const page = await context.newPage();
   const errors = [];

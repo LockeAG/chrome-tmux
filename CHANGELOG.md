@@ -17,6 +17,10 @@ loosely and [semantic versioning](https://semver.org/).
   every control in the settings page has a name.
 - Four browser tests covering the above, since roles are exactly the kind of
   thing that silently rots.
+- The version is shown in the popup, the settings page and the help overlay
+  footer. Telling a stale build from a real bug has cost several rounds of
+  confusion, and a reported error against an old build looks identical to a new
+  one.
 - `store/listing.md`, the Chrome Web Store submission copy: description, single
   purpose statement, a justification per permission, and the data-use answers.
 

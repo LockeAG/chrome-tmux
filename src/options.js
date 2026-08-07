@@ -151,6 +151,9 @@ document.getElementById('reset')?.addEventListener('click', async () => {
   say('reset');
 });
 
+/** @type {HTMLElement} */ (document.getElementById('version')).textContent =
+  `v${chrome.runtime.getManifest().version}`;
+
 CONFIG.load().then((loaded) => {
   degraded = loaded === null;
   current = loaded ?? CONFIG.defaults();
