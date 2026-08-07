@@ -181,6 +181,7 @@ pnpm smoke                                         # load it in a real Chrome
 pnpm build:store                                   # dist/, without the new tab
 npm run typecheck                                  # types only
 node tools/make-icons.cjs icons                    # extension icons
+node tools/make-screenshots.mjs                     # store screenshots
 node tools/make-store-shots.cjs <src> assets/store
 node tools/make-promo.cjs <capture> assets/store
 ```

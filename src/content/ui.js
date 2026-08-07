@@ -26,7 +26,7 @@ globalThis.SV_UI = (() => {
     }
 
     .panel {
-      width: min(680px, 92vw); max-height: 70vh;
+      width: min(680px, 92vw); max-height: 86vh;
       display: flex; flex-direction: column; overflow: hidden;
       border-radius: 10px; border: 1px solid #414868;
       background: #1a1b26; color: #c0caf5;
@@ -76,6 +76,9 @@ globalThis.SV_UI = (() => {
       padding: 8px 14px; border-top: 1px solid #292e42;
       font-size: 11px; color: #565f89;
     }
+
+    .panel:focus-visible { outline: 1px solid #7aa2f7; outline-offset: -1px; }
+    .panel:focus:not(:focus-visible) { outline: none; }
 
     .help { padding: 18px 20px; overflow-y: auto; }
     .help section + section { margin-top: 18px; }
