@@ -5,6 +5,18 @@ loosely and [semantic versioning](https://semver.org/).
 
 ## Unreleased
 
+### Added
+
+- Tests that check the package holds together, not just that the logic is
+  right. The content scripts are loaded from five places, the manifest, the
+  on-demand injection and three HTML pages, and nothing in Chrome keeps those
+  lists in step. Twice a file was added to one and forgotten in the others,
+  leaving a page that threw on its first line and silently did nothing. Now a
+  test asserts they agree, that every path the manifest names exists, that any
+  page reading the settings global loads the file that defines it, and that the
+  help overlay and the service worker document the same set of prefix keys.
+  Each guard was checked by reintroducing the bug it exists for.
+
 ### Fixed
 
 - The replacement New Tab Page had been dead since the settings feature landed:
