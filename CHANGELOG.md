@@ -17,6 +17,8 @@ loosely and [semantic versioning](https://semver.org/).
   every control in the settings page has a name.
 - Four browser tests covering the above, since roles are exactly the kind of
   thing that silently rots.
+- `store/listing.md`, the Chrome Web Store submission copy: description, single
+  purpose statement, a justification per permission, and the data-use answers.
 
 ### Known
 

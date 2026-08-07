@@ -198,6 +198,13 @@ to mush before anything else runs. Zoom the page first, then capture:
 document.documentElement.style.zoom = '3'
 ```
 
+## Publishing
+
+[store/listing.md](store/listing.md) holds the Chrome Web Store copy: the
+description, the single-purpose statement, a justification for each permission,
+and what to answer on the data-use form. The submission is the `dist/` build,
+which has three permissions rather than six.
+
 ## Changelog
 
 [CHANGELOG.md](CHANGELOG.md).
