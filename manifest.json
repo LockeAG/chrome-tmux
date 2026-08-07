@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Chrome tmux",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "tmux-style prefix and a vim mode for Chrome.",
   "minimum_chrome_version": "127",
   "background": {

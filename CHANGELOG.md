@@ -3,7 +3,10 @@
 Notable changes, newest first. Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 loosely and [semantic versioning](https://semver.org/).
 
-## Unreleased
+## 0.2.0 - 2026-08-06
+
+The first release worth installing. 0.1.0 was tagged with the New Tab Page
+broken, and with a hole that let any web page drive the extension.
 
 ### Added
 
@@ -130,7 +133,9 @@ loosely and [semantic versioning](https://semver.org/).
 
 ## 0.1.0 - 2026-08-05
 
-First tag. Load-unpacked only, no store listing.
+First tag. **Do not use.** The New Tab Page was dead in this commit, and any
+web page could dispatch synthetic keyboard events to close your tabs. Both are
+fixed in 0.2.0.
 
 ### Added
 
