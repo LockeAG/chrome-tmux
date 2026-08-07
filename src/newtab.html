@@ -82,23 +82,44 @@
         text-overflow: ellipsis;
       }
 
+      main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 44px;
+        width: 100%;
+      }
+
+      /* Present to a screen reader, absent to everyone else. */
+      .visually-hidden {
+        position: absolute;
+        width: 1px; height: 1px;
+        margin: -1px; padding: 0; border: 0;
+        clip-path: inset(50%);
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
       footer { color: var(--dim); font-size: 12px; }
       footer b { color: var(--accent); font-weight: 400; }
     </style>
   </head>
   <body>
-    <form id="search">
-      <input
-        id="q"
-        name="q"
-        type="text"
-        placeholder="Search"
-        autocomplete="off"
-        spellcheck="false"
-      />
-    </form>
+    <main>
+      <form id="search" role="search">
+        <label class="visually-hidden" for="q">Search the web</label>
+        <input
+          id="q"
+          name="q"
+          type="search"
+          placeholder="Search"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </form>
 
-    <nav class="sites" id="sites"></nav>
+      <nav class="sites" id="sites" aria-label="Most visited"></nav>
+    </main>
 
     <footer><b id="prefix">…</b> then <b>?</b> for the keys</footer>
 

@@ -146,6 +146,12 @@ takes focus back as it loads. If one ever ignores you, click it once.
   wants its own keys.
 - `Ctrl-X` reports success as soon as Chrome accepts the close. A page that
   stops you leaving with a dialog can survive it and reappear in the list.
+- **What you type into the tab filter is visible to the page you are on**, if
+  that page listens for keys in the capture phase. The overlay lives in a closed
+  shadow root, so the page cannot read the list or the results, but the
+  keystrokes travel through its document on the way in. Closing that properly
+  means moving the overlay into an iframe, which is the plan; until then, do not
+  filter by anything you would not type into the page itself.
 
 ## Privacy and security
 

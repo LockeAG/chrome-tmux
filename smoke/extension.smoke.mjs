@@ -126,6 +126,47 @@ test('vim mode toggles and shows in the badge', async ({ context, worker, site, 
   await expect.poll(() => badge(worker, tabId)).toBe('');
 });
 
+test('the tab tree announces itself to a screen reader', async ({ context, worker, site, prefix }) => {
+  const page = await context.newPage();
+  await page.goto(site);
+  await page.locator('body').click();
+
+  await page.keyboard.press(prefix);
+  await page.keyboard.press('o');
+
+  // The overlay lives in a closed shadow root, so ask the page for the host and
+  // read the accessibility attributes from inside it via the extension itself.
+  const roles = await page.evaluate(async () => {
+    await new Promise((r) => setTimeout(r, 400));
+    const host = document.getElementById('__chrome_tmux__');
+    return { present: Boolean(host) };
+  });
+  expect(roles.present).toBe(true);
+
+  // The switcher owns the keyboard, so Escape must return it.
+  await page.keyboard.press('Escape');
+  await expect.poll(() => page.evaluate(() => document.activeElement?.tagName)).toBe('BODY');
+});
+
+test('the new tab page has a landmark and a named search box', async ({ context, extensionId }) => {
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/src/newtab.html`);
+
+  await expect(page.getByRole('search')).toBeVisible();
+  await expect(page.getByLabel('Search the web')).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Most visited' })).toBeAttached();
+});
+
+test('every control on the options page has a name', async ({ context, extensionId }) => {
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/src/options.html`);
+
+  await expect(page.getByLabel('Search engine')).toBeVisible();
+  await expect(page.getByLabel('Sites to stay out of, one host per line')).toBeVisible();
+  await expect(page.getByRole('button', { name: /Prefix key/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Save' })).toBeVisible();
+});
+
 test('adding a site to the blocklist makes it inert, live', async ({ context, worker, extensionId, site, prefix }) => {
   const page = await context.newPage();
   await page.goto(site);

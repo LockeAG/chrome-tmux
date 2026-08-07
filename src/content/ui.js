@@ -155,6 +155,10 @@ globalThis.SV_UI = (() => {
       return;
     }
     const node = existing ?? r.appendChild(el('div', 'indicator'));
+    // The whole extension is modal, so a mode change that is only visible is a
+    // mode change a screen reader user never learns about.
+    node.setAttribute('role', 'status');
+    node.setAttribute('aria-live', 'polite');
     node.dataset.kind = kind;
     node.textContent = kind === 'armed' ? '-- PREFIX --' : '-- VIM --';
   }
@@ -194,12 +198,15 @@ globalThis.SV_UI = (() => {
 
   /* Tab switcher */
 
-  /** @type {{ scrim: HTMLElement, token: object } | null} */
+  /** @type {{ scrim: HTMLElement, token: object, restore: HTMLElement | null } | null} */
   let switcher = null;
 
   function closeSwitcher() {
+    const restore = switcher?.restore;
     switcher?.scrim.remove();
     switcher = null;
+    // Put focus back where it was, or the page loses its place entirely.
+    if (restore?.isConnected) restore.focus({ preventScroll: true });
   }
 
   function openSwitcher({ groups, activeTabId, collapsed }, onPick, onClose) {
@@ -210,10 +217,22 @@ globalThis.SV_UI = (() => {
 
     const scrim = el('div', 'scrim');
     const panel = el('div', 'panel');
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-modal', 'true');
+    panel.setAttribute('aria-label', collapsed ? 'Windows' : 'Tabs');
+
     const search = el('input', 'search');
     search.placeholder = collapsed ? 'Filter windows' : 'Filter tabs';
+    search.setAttribute('aria-label', collapsed ? 'Filter windows' : 'Filter tabs');
+    search.setAttribute('role', 'combobox');
+    search.setAttribute('aria-expanded', 'true');
+    search.setAttribute('aria-autocomplete', 'list');
     search.spellcheck = false;
+
     const list = el('div', 'list');
+    list.id = 'sv-list';
+    list.setAttribute('role', 'listbox');
+    search.setAttribute('aria-controls', list.id);
     const footer = el(
       'div',
       'footer',
@@ -294,6 +313,9 @@ globalThis.SV_UI = (() => {
           lastGroup = item.group;
         }
         const row = el('div', 'row');
+        row.id = `sv-row-${rows.length}`;
+        row.setAttribute('role', 'option');
+        row.setAttribute('aria-label', `${item.title}. ${item.url}`);
         row.dataset.active = String(item.active);
         row.dataset.live = String(Boolean(item.live));
         row.dataset.audible = String(Boolean(item.audible));
@@ -314,9 +336,15 @@ globalThis.SV_UI = (() => {
 
     function paintSelection() {
       rows.forEach((row, i) => {
-        row.node.dataset.selected = String(i === selected);
+        const isSelected = i === selected;
+        row.node.dataset.selected = String(isSelected);
+        row.node.setAttribute('aria-selected', String(isSelected));
       });
-      rows[selected]?.node.scrollIntoView({ block: 'nearest' });
+      const current = rows[selected]?.node;
+      current?.scrollIntoView({ block: 'nearest' });
+      // Focus stays in the filter box, so the selected row is announced from here.
+      if (current) search.setAttribute('aria-activedescendant', current.id);
+      else search.removeAttribute('aria-activedescendant');
     }
 
     function move(step) {
@@ -392,7 +420,7 @@ globalThis.SV_UI = (() => {
       if (event.target === scrim) closeSwitcher();
     });
 
-    switcher = { scrim, token };
+    switcher = { scrim, token, restore: /** @type {HTMLElement | null} */ (document.activeElement) };
     render();
     search.focus({ preventScroll: true });
   }
@@ -437,12 +465,14 @@ globalThis.SV_UI = (() => {
     ]]
   ];
 
-  /** @type {{ scrim: HTMLElement } | null} */
+  /** @type {{ scrim: HTMLElement, restore: HTMLElement | null } | null} */
   let help = null;
 
   function closeHelp() {
+    const restore = help?.restore;
     help?.scrim.remove();
     help = null;
+    if (restore?.isConnected) restore.focus({ preventScroll: true });
   }
 
   function openHelp() {
@@ -451,6 +481,10 @@ globalThis.SV_UI = (() => {
 
     const scrim = el('div', 'scrim');
     const panel = el('div', 'panel');
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-modal', 'true');
+    panel.setAttribute('aria-label', 'Keyboard shortcuts');
+    panel.tabIndex = -1;
     const body = el('div', 'help');
 
     KEYMAP.forEach(([title, rows]) => {
@@ -469,7 +503,8 @@ globalThis.SV_UI = (() => {
     r.append(scrim);
 
     scrim.addEventListener('mousedown', closeHelp);
-    help = { scrim };
+    help = { scrim, restore: /** @type {HTMLElement | null} */ (document.activeElement) };
+    panel.focus({ preventScroll: true });
   }
 
   /* Link hints */
@@ -532,6 +567,7 @@ globalThis.SV_UI = (() => {
     const nodes = targets.map((element, i) => {
       const rect = element.getBoundingClientRect();
       const marker = el('div', 'hint', keys[i]);
+      marker.setAttribute('aria-hidden', 'true');
       marker.style.left = `${Math.max(0, rect.left)}px`;
       marker.style.top = `${Math.max(0, rect.top)}px`;
       r.append(marker);
@@ -603,6 +639,7 @@ globalThis.SV_UI = (() => {
     const node = el('div', 'findbar');
     const label = el('span', null, '/');
     const input = el('input');
+    input.setAttribute('aria-label', 'Find on page');
     input.spellcheck = false;
     node.append(label, input);
     r.append(node);

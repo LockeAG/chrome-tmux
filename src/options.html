@@ -85,6 +85,15 @@
       select:focus, #custom:focus { border-color: var(--accent); }
       #custom { flex: 1; min-width: 260px; }
 
+      .visually-hidden {
+        position: absolute;
+        width: 1px; height: 1px;
+        margin: -1px; padding: 0; border: 0;
+        clip-path: inset(50%);
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
       .note { color: var(--dim); font-size: 12px; }
       .note:not(:empty) { max-width: 320px; }
 
@@ -130,8 +139,8 @@
           alone unless you want the same key everywhere.
         </p>
         <div class="prefix-row">
-          <button id="prefix" type="button">…</button>
-          <span id="prefix-note" class="note"></span>
+          <button id="prefix" type="button" aria-label="Prefix key, click then press a combination">…</button>
+          <span id="prefix-note" class="note" role="status" aria-live="polite"></span>
         </div>
       </section>
 
@@ -142,7 +151,9 @@
           with <code>%s</code> where the query goes.
         </p>
         <div class="prefix-row">
+          <label class="visually-hidden" for="engine">Search engine</label>
           <select id="engine"></select>
+          <label class="visually-hidden" for="custom">Custom search URL</label>
           <input id="custom" type="text" placeholder="https://example.com/?q=%s" hidden />
         </div>
       </section>
@@ -157,13 +168,14 @@
           documents, spreadsheets and mail, where the browser's own editing keys
           matter more. Delete any line you disagree with.
         </p>
+        <label class="visually-hidden" for="disabled">Sites to stay out of, one host per line</label>
         <textarea id="disabled" spellcheck="false" placeholder="mail.google.com&#10;docs.google.com&#10;*.figma.com"></textarea>
       </section>
 
       <footer>
         <button id="save" type="button">Save</button>
         <button id="reset" class="quiet" type="button">Reset to defaults</button>
-        <span id="status"></span>
+        <span id="status" role="status" aria-live="polite"></span>
       </footer>
     </main>
 

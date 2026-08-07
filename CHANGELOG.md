@@ -3,6 +3,28 @@
 Notable changes, newest first. Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 loosely and [semantic versioning](https://semver.org/).
 
+## Unreleased
+
+### Added
+
+- Accessibility. The tab tree and the help overlay are proper dialogs with
+  `aria-modal`, the list is a listbox whose rows are options with
+  `aria-selected`, and the filter box owns `aria-activedescendant` so the
+  highlighted tab is announced without focus leaving the box. The mode
+  indicator is a live region, so arming the prefix or entering vim mode is
+  spoken rather than only drawn. Closing an overlay puts focus back where it
+  came from. The new tab page has a landmark and a labelled search box, and
+  every control in the settings page has a name.
+- Four browser tests covering the above, since roles are exactly the kind of
+  thing that silently rots.
+
+### Known
+
+- Keystrokes typed into the tab filter are visible to a page that listens in the
+  capture phase. The overlay's contents are not, because it lives in a closed
+  shadow root, but the keys pass through the page's document. The complete fix
+  is to move the overlay into an iframe.
+
 ## 0.2.0 - 2026-08-06
 
 The first release worth installing. 0.1.0 was tagged with the New Tab Page
