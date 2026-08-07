@@ -77,6 +77,9 @@ text box has focus, so typing in a search field never scrolls the page.
 | `Tab` | toggle tabs and windows |
 | `Enter` `Esc` | switch / close |
 
+The footer inside the list repeats these, and points at the settings. It names
+whichever prefix you have set, not the default.
+
 Plain `j` and `k` cannot move: the filter box has focus, so they would type
 letters. `Enter` on a window row brings that window forward and leaves its own
 tab alone.

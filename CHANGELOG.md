@@ -3,6 +3,16 @@
 Notable changes, newest first. Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 loosely and [semantic versioning](https://semver.org/).
 
+## Unreleased
+
+### Changed
+
+- The tab tree footer now points at the settings: `C-a , settings`, alongside
+  the keys that work inside the list.
+- The footer and the help overlay name the prefix you actually have. Both had
+  `C-a` written into them, so the moment anyone rebound the prefix the entire
+  help screen was wrong.
+
 ## 0.2.1 - 2026-08-07
 
 The submission build. 0.2.0 shipped a store package whose settings page threw on

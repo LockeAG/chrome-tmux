@@ -304,7 +304,7 @@
       // Help is drawn in the page, so it needs no round trip.
       if (CONFIG.actionKey(event.key, event.code, event.shiftKey) === '?') {
         send({ type: 'disarm' });
-        UI.openHelp();
+        UI.openHelp(CONFIG.label(prefix));
         return;
       }
       send({ type: 'armedKey', key: CONFIG.actionKey(event.key, event.code, event.shiftKey) }).then((response) => {
@@ -348,7 +348,7 @@
         if (blocked) break;
         setArmed(false);
         UI.openSwitcher(
-          message,
+          { ...message, prefixLabel: CONFIG.label(prefix) },
           (target) => send({ type: 'pick', ...target }),
           (tabId) => send({ type: 'close', tabId })
         );

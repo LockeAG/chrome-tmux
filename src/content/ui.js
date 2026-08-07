@@ -209,7 +209,7 @@ globalThis.SV_UI = (() => {
     if (restore?.isConnected) restore.focus({ preventScroll: true });
   }
 
-  function openSwitcher({ groups, activeTabId, collapsed }, onPick, onClose) {
+  function openSwitcher({ groups, activeTabId, collapsed, prefixLabel = 'C-a' }, onPick, onClose) {
     closeSwitcher();
     // Identity for this overlay, so work still in flight cannot act on a later one.
     const token = {};
@@ -236,7 +236,7 @@ globalThis.SV_UI = (() => {
     const footer = el(
       'div',
       'footer',
-      'enter switch · ctrl-j/ctrl-k move · ctrl-x close tab · tab windows · esc'
+      `enter switch · ctrl-j/ctrl-k move · ctrl-x close tab · tab windows · esc · ${prefixLabel} , settings`
     );
 
     panel.append(search, list, footer);
@@ -477,7 +477,8 @@ globalThis.SV_UI = (() => {
     if (restore?.isConnected) restore.focus({ preventScroll: true });
   }
 
-  function openHelp() {
+  /** @param {string} [prefixLabel] */
+  function openHelp(prefixLabel = 'C-a') {
     closeHelp();
     const r = ensureRoot();
 
@@ -494,7 +495,9 @@ globalThis.SV_UI = (() => {
       section.append(el('h3', null, title));
       const list = el('dl');
       rows.forEach(([keys, description]) => {
-        list.append(el('dt', null, keys), el('dd', null, description));
+        // KEYMAP is written with C-a, but the prefix is rebindable, so a
+        // hardcoded help screen would be wrong for anyone who changed it.
+        list.append(el('dt', null, keys.replaceAll('C-a', prefixLabel)), el('dd', null, description));
       });
       section.append(list);
       body.append(section);

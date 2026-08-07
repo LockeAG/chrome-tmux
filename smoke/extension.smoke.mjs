@@ -134,6 +134,33 @@ test('vim mode toggles and shows in the badge', async ({ context, worker, site, 
   await expect.poll(() => badge(worker, tabId)).toBe('');
 });
 
+test('the overlays name the prefix the user actually set', async ({ context, worker, site, extensionId }) => {
+  // Rebind to something that is nobody's default, so a hardcoded 'C-a' shows up.
+  await worker.evaluate(() =>
+    chrome.storage.sync.set({
+      settings: {
+        prefix: { ctrl: true, alt: false, shift: false, meta: false, code: 'Semicolon', key: ';' },
+        disabled: []
+      }
+    })
+  );
+
+  const page = await context.newPage();
+  await page.goto(site);
+  await page.locator('body').click();
+  await page.waitForTimeout(300);
+
+  await page.keyboard.press('Control+;');
+  await expect
+    .poll(() =>
+      worker.evaluate(async () => {
+        const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+        return chrome.action.getBadgeText({ tabId: tab.id });
+      })
+    )
+    .toBe('^A', 'the rebound prefix arms');
+});
+
 test('the tab tree announces itself to a screen reader', async ({ context, worker, site, prefix }) => {
   const page = await context.newPage();
   await page.goto(site);
