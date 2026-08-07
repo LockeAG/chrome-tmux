@@ -56,13 +56,17 @@ Two different stores are used, and the difference matters:
 
 ## Permissions
 
+The Chrome Web Store build asks for fewer of these than the version in the
+repository: it has no New Tab Page, so it needs neither `topSites` nor
+`favicon`.
+
 | Permission | What it is for |
 | --- | --- |
 | `tabs` | read tab titles and URLs, switch, create and close tabs |
 | `storage` | session state for tabs, plus your settings (see above) |
 | `scripting` | start working in tabs that were already open when you installed it |
-| `topSites` | the tiles on the New Tab Page |
-| `favicon` | site icons on the New Tab Page, an extension page, never on your sites |
+| `topSites` | the tiles on the New Tab Page, repo build only |
+| `favicon` | site icons on the New Tab Page, repo build only, never on your sites |
 | `<all_urls>` | the prefix has to work on every page, so the key listener runs everywhere |
 
 `<all_urls>` is the broadest of these. It is required because a keyboard
@@ -78,4 +82,4 @@ Any change to this policy will appear in
 [CHANGELOG.md](CHANGELOG.md) and in the repository history at
 https://github.com/LockeAG/chrome-tmux.
 
-Last updated: 2026-08-06.
+Last updated: 2026-08-07.

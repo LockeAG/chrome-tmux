@@ -3,7 +3,41 @@
 Notable changes, newest first. Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 loosely and [semantic versioning](https://semver.org/).
 
-## Unreleased
+## 0.2.1 - 2026-08-07
+
+The submission build. 0.2.0 shipped a store package whose settings page threw on
+its first line.
+
+### Fixed
+
+- **The store build's settings page was dead on arrival.** The build strips the
+  search section, which only serves the New Tab Page, but shipped `options.js`
+  untouched. Its listener on the removed element threw before Save, Reset, the
+  prefix display and the blocklist ever attached. Every file-list and string
+  check passed, so three browser tests now load the store build and use it.
+- **The prefix armed on two different physical keys.** Accepting either the
+  character or the position meant that on AZERTY both the key labelled A and the
+  key sitting where QWERTY has A, labelled Q, armed it. Pressing Ctrl-Q, an
+  ordinary shortcut, silently swallowed the next keystroke. The label now wins
+  whenever the layout produces one, and the position is only a fallback.
+- **The layout fallback discarded Shift**, so on a Cyrillic layout every shifted
+  command collapsed into its lowercase twin: `H`, history back, scrolled left
+  instead.
+- **An Option chord while armed ran the command of its physical key.** On macOS
+  an armed Option-X produces `≈`, which fell back to the physical key and closed
+  the tab. Alt and Cmd now disarm rather than act.
+- Reset showed an empty blocklist while saving the default one, so the extension
+  stayed inert on Gmail and Docs with nothing on screen to explain why.
+- `build-store.cjs` would delete the repository, `.git` included, if pointed at
+  it. It now refuses.
+- The save message described a hidden field rather than what was stored.
+- The tab tree kept naming a selected row that no longer existed when a filter
+  matched nothing, which a screen reader would have read out.
+- Several documentation claims that were false: the store listing said the
+  content script reads nothing from the page, which contradicted the privacy
+  policy and the code; the storage justification described a search setting the
+  store build does not ship; the manual checklist described the wrong fallback
+  for an unusable search URL.
 
 ### Added
 
@@ -46,10 +80,11 @@ broken, and with a hole that let any web page drive the extension.
   and the override that reviewers are trained to distrust, leaving `tabs`,
   `storage` and `scripting`. The repo keeps the full extension. The build fails
   rather than ship a package that half-mentions a page it does not include, and
-  four tests check the two builds cannot quietly diverge.
-- CI on every push and pull request: types, unit tests and the browser smoke
-  suite, the last under a virtual display because an extension needs a real
-  browser. Failures upload the Playwright trace.
+  seven tests check the two builds cannot quietly diverge, three of which load
+  the store build in a real browser.
+- CI on every push to `main` and on every pull request: types, unit tests and
+  the browser smoke suite, the last under a virtual display because an
+  extension needs a real browser. Failures upload the Playwright trace.
 - A browser smoke suite, `npm run smoke`. Playwright loads the extension into a
   real Chrome and checks what no unit test can: the service worker starts and
   stays up, the new tab, options and popup pages load every script they depend

@@ -303,6 +303,8 @@ globalThis.SV_UI = (() => {
       rows = [];
       if (!items.length) {
         list.append(el('div', 'empty', query ? 'No matches' : 'No tabs'));
+        // The rows it pointed at were just removed, so stop naming one.
+        search.removeAttribute('aria-activedescendant');
         return;
       }
 

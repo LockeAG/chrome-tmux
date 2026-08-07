@@ -191,7 +191,7 @@
   function handleVimKey(event) {
     // On a Cyrillic layout `event.key` is 'ц' where the keycap says W, so fall
     // back to the physical key rather than leaving vim mode dead.
-    const key = CONFIG.actionKey(event.key, event.code);
+    const key = CONFIG.actionKey(event.key, event.code, event.shiftKey);
 
     if (pendingG) {
       clearTimeout(gTimer);
@@ -278,7 +278,7 @@
     }
 
     if (UI.hintsOpen()) {
-      const result = UI.feedHint(CONFIG.actionKey(event.key, event.code));
+      const result = UI.feedHint(CONFIG.actionKey(event.key, event.code, event.shiftKey));
       if (result !== 'ignored') {
         event.preventDefault();
         event.stopPropagation();
@@ -287,6 +287,13 @@
     }
 
     if (armed) {
+      // Ctrl is allowed, because C-a C-o is a real binding. Alt and Cmd are
+      // not: on macOS an armed Option-X produces '≈', which falls back to the
+      // physical key and would close the tab. Disarm and let it through.
+      if (event.altKey || event.metaKey) {
+        setArmed(false, true);
+        return;
+      }
       event.preventDefault();
       event.stopPropagation();
       setArmed(false);
@@ -295,12 +302,12 @@
         return;
       }
       // Help is drawn in the page, so it needs no round trip.
-      if (CONFIG.actionKey(event.key, event.code) === '?') {
+      if (CONFIG.actionKey(event.key, event.code, event.shiftKey) === '?') {
         send({ type: 'disarm' });
         UI.openHelp();
         return;
       }
-      send({ type: 'armedKey', key: CONFIG.actionKey(event.key, event.code) }).then((response) => {
+      send({ type: 'armedKey', key: CONFIG.actionKey(event.key, event.code, event.shiftKey) }).then((response) => {
         if (response?.mode) setMode(response.mode);
       });
       return;

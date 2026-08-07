@@ -2,8 +2,11 @@
 
 const CONFIG = globalThis.SV_SETTINGS;
 
-const engineSelect = /** @type {HTMLSelectElement} */ (document.getElementById('engine'));
-const customInput = /** @type {HTMLInputElement} */ (document.getElementById('custom'));
+// The store build strips the search section, since it only serves the New Tab
+// Page. Everything that touches it has to tolerate its absence, or the whole
+// script dies on the first line and takes Save and the blocklist with it.
+const engineSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById('engine'));
+const customInput = /** @type {HTMLInputElement | null} */ (document.getElementById('custom'));
 const prefixButton = /** @type {HTMLButtonElement} */ (document.getElementById('prefix'));
 const prefixNote = /** @type {HTMLElement} */ (document.getElementById('prefix-note'));
 const disabledBox = /** @type {HTMLTextAreaElement} */ (document.getElementById('disabled'));
@@ -17,6 +20,7 @@ let capturing = false;
 let degraded = false;
 
 function renderEngine() {
+  if (!engineSelect || !customInput) return;
   if (!engineSelect.options.length) {
     for (const [name, url] of CONFIG.ENGINES) engineSelect.add(new Option(name, url));
     engineSelect.add(new Option('Custom', 'custom'));
@@ -99,7 +103,8 @@ prefixButton.addEventListener('keydown', (event) => {
   render();
 });
 
-engineSelect.addEventListener('change', () => {
+engineSelect?.addEventListener('change', () => {
+  if (!customInput) return;
   if (engineSelect.value === 'custom') {
     customInput.hidden = false;
     customInput.focus();
@@ -109,7 +114,7 @@ engineSelect.addEventListener('change', () => {
   render();
 });
 
-customInput.addEventListener('input', () => {
+customInput?.addEventListener('input', () => {
   current = { ...current, search: customInput.value };
 });
 
@@ -117,10 +122,11 @@ document.getElementById('save')?.addEventListener('click', async () => {
   if (degraded) return;
   const typed = disabledBox.value.split('\n').map((line) => line.trim()).filter(Boolean);
 
+  const wanted = { ...current, disabled: typed };
   try {
     // save() normalises: a pasted URL, a port, a trailing dot or an IDN all
     // become the bare host the content script will actually compare against.
-    current = await CONFIG.save({ ...current, disabled: typed });
+    current = await CONFIG.save(wanted);
   } catch (error) {
     // Sync has an 8 KB per-item cap and a write rate limit. Silence here would
     // leave you believing a blocklist was saved when it was not.
@@ -132,10 +138,11 @@ document.getElementById('save')?.addEventListener('click', async () => {
   render();
 
   const dropped = typed.length - current.disabled.length;
+  // Report on what was actually stored, not on a field that may be hidden or
+  // hold a stale value from a choice the user has since changed.
   if (dropped > 0) say(`saved, ${dropped} line(s) were not usable hosts`);
-  else if (customInput.value.trim() && !customInput.value.includes('%s')) {
-    say('saved, but the custom search URL needs a %s, so Google was kept');
-  } else say('saved');
+  else if (wanted.search !== current.search) say('saved, but that search URL was unusable');
+  else say('saved');
 });
 
 document.getElementById('reset')?.addEventListener('click', async () => {
@@ -146,7 +153,9 @@ document.getElementById('reset')?.addEventListener('click', async () => {
     return;
   }
   degraded = false;
-  disabledBox.value = '';
+  // defaults() ships a blocklist, so an empty box here would lie about what is
+  // now stored and synced to every machine.
+  disabledBox.value = current.disabled.join('\n');
   render();
   say('reset');
 });

@@ -59,6 +59,7 @@ Prefix, press Ctrl-A then:
   ,              settings
   ?              every key, shown in the page
   Ctrl-A         jump the caret to the start of the line
+  Esc            cancel, having pressed the prefix by mistake
 
 Vim mode, bare keys:
   h j k l        scroll
@@ -132,10 +133,10 @@ beyond the browser session and nothing is transmitted.
 ### Permission: `storage`
 
 ```
-Stores the user's own settings: which prefix key they chose, the list of sites
-where they want the extension to stay out of the way, and their preferred search
-engine. Also holds per-tab state for the current session, such as whether vim
-mode is on, in chrome.storage.session, which Chrome clears on quit.
+Stores the user's own settings: which prefix key they chose, and the list of
+sites where they want the extension to stay out of the way. Also holds per-tab
+state for the current session, such as whether vim mode is on, in
+chrome.storage.session, which Chrome clears on quit.
 ```
 
 ### Permission: `scripting`
@@ -153,8 +154,14 @@ or evaluated at runtime.
 ```
 The extension is a keyboard shortcut, and a shortcut that only works on some
 sites is not a shortcut. The content script listens for one key combination and
-draws its overlay in a closed shadow root; it does not read page content, form
-fields or anything the user types.
+draws its overlay in a closed shadow root.
+
+It reads part of the page only while carrying out something the user asked for:
+link hints read the href of the links on screen, find searches the page text for
+what was typed, and the double-prefix passthrough reads the caret position in
+the focused field so it can move it. None of that is stored, logged or
+transmitted. It does not read passwords and does not record what the user
+types.
 
 Users can switch it off per site in the settings, and it ships already switched
 off for documents, spreadsheets and mail, where the browser's own editing keys
@@ -192,8 +199,9 @@ https://github.com/LockeAG/chrome-tmux/blob/main/PRIVACY.md
 
 - [ ] `pnpm build:store`, then zip the **contents** of `dist/`, not the folder
 - [ ] Load that zip unpacked once and press the keys. It is a different build
-      from the one you have been using: no New Tab Page, three permissions
-- [ ] Check `manifest.json` in the zip says `0.2.0` and lists exactly
+      from the one you have been using: no New Tab Page, and `tabs`, `storage`
+      and `scripting` where the repo build also has `topSites` and `favicon`
+- [ ] Check `manifest.json` in the zip says `0.2.1` and lists exactly
       `tabs`, `storage`, `scripting`
 - [ ] Screenshots: `assets/store/screenshot-01.png` and `-02.png`, 1280x800
 - [ ] Small promo tile: `assets/store/promo-small.png`, 440x280

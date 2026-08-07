@@ -87,8 +87,8 @@ Search engine:
       *Search DuckDuckGo* and a query goes there
 - [ ] Pick **Custom**, enter `https://example.com/?q=%s`, save, search, and
       check the URL
-- [ ] Pick Custom, enter something with no `%s`, save. It says so and keeps the
-      previous engine
+- [ ] Pick Custom, enter something with no `%s`, save. It says the URL was
+      unusable and falls back to Google, not to whatever you had before
 
 Blocklist:
 

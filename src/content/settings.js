@@ -240,12 +240,15 @@ globalThis.SV_SETTINGS = (() => {
       event.shiftKey === prefix.shift;
     if (!modifiers) return false;
 
-    // Position or label, whichever the layout gives us. On a Cyrillic layout
-    // the character is 'ф' and only the code helps; on AZERTY the code has
-    // moved and only the character does.
-    if (event.code === prefix.code) return true;
-    return Boolean(prefix.key) && isPlainKey(event.key) &&
-      String(event.key).toLowerCase() === prefix.key;
+    // The label wins whenever the layout produces one, and the position is
+    // only a fallback. Accepting either outright matched two different keys on
+    // AZERTY: the key labelled A by its character, and the key sitting where
+    // QWERTY has A, which is labelled Q, by its code. Ctrl-Q would have armed
+    // the prefix and eaten the next keystroke.
+    if (prefix.key && isPlainKey(event.key)) {
+      return String(event.key).toLowerCase() === prefix.key;
+    }
+    return event.code === prefix.code;
   }
 
   /**
@@ -277,11 +280,15 @@ globalThis.SV_SETTINGS = (() => {
    * usually printed on the keycap next to the local letter.
    * @param {string} key
    * @param {string} code
+   * @param {boolean} [shift] case matters: H is history, h is scroll left
    */
-  function actionKey(key, code) {
+  function actionKey(key, code, shift) {
     if (isPlainKey(key)) return key;
     if (typeof code !== 'string') return key;
-    if (code.startsWith('Key')) return code.slice(3).toLowerCase();
+    if (code.startsWith('Key')) {
+      const letter = code.slice(3);
+      return shift ? letter.toUpperCase() : letter.toLowerCase();
+    }
     if (code.startsWith('Digit')) return code.slice(5);
     const punctuation = { Comma: ',', Period: '.', Slash: '/', Semicolon: ';', Quote: "'" };
     return punctuation[code] ?? key;

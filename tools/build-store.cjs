@@ -34,6 +34,19 @@ function copy(from, to) {
   fs.copyFileSync(from, to);
 }
 
+// `node tools/build-store.cjs .` would otherwise delete the repository, .git
+// and all, before failing on the missing sources.
+if (out === root || root.startsWith(out + path.sep)) {
+  console.error(`refusing to build into ${out}: that is the repository`);
+  process.exit(1);
+}
+for (const marker of ['.git', 'package.json', 'src']) {
+  if (fs.existsSync(path.join(out, marker)) && out !== path.join(root, 'dist')) {
+    console.error(`refusing to build into ${out}: it contains ${marker}`);
+    process.exit(1);
+  }
+}
+
 fs.rmSync(out, { recursive: true, force: true });
 for (const entry of COPY) copy(path.join(root, entry), path.join(out, entry));
 

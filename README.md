@@ -185,7 +185,10 @@ node tools/make-promo.cjs <capture> assets/store
 The store build is deliberately narrower: `pnpm build:store` writes `dist/`
 without the New Tab Page, which drops the `topSites` and `favicon` permissions
 and the override that makes a review slow. The repo keeps the full extension;
-load that unpacked. Four tests check the two cannot quietly diverge.
+load that unpacked. Seven tests check the two cannot quietly diverge, and three of them load the
+store build in a real browser rather than reading its file list. That matters:
+the build once shipped a settings page that threw on its first line, and every
+file-list check passed.
 
 `tools/promo.html` is the cover art. Serve it, capture it at any size, and
 `make-promo.cjs` cuts it into the cover, tile and marquee.
@@ -203,7 +206,8 @@ document.documentElement.style.zoom = '3'
 [store/listing.md](store/listing.md) holds the Chrome Web Store copy: the
 description, the single-purpose statement, a justification for each permission,
 and what to answer on the data-use form. The submission is the `dist/` build,
-which has three permissions rather than six.
+which asks for `tabs`, `storage` and `scripting` where the repo build also asks
+for `topSites` and `favicon`. Both request the `<all_urls>` host permission.
 
 ## Changelog
 

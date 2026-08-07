@@ -94,6 +94,32 @@ test('the prefix fires on either the position or the keycap', () => {
   assert.equal(S.matches(prefix, { key: 'a', code: 'KeyA', ...mods, shiftKey: true }), false);
 });
 
+test('exactly one physical key arms the prefix on any layout', () => {
+  const S = loadSettings();
+  const prefix = { ctrl: true, alt: false, shift: false, meta: false, code: 'KeyA', key: 'a' };
+  const mods = { ctrlKey: true, altKey: false, metaKey: false, shiftKey: false };
+
+  assert.equal(S.matches(prefix, { key: 'a', code: 'KeyA', ...mods }), true, 'QWERTY');
+  // AZERTY: the key labelled A reports code KeyQ, and must match by label.
+  assert.equal(S.matches(prefix, { key: 'a', code: 'KeyQ', ...mods }), true, 'AZERTY label');
+  // The key sitting where QWERTY has A is labelled Q there, and must NOT match,
+  // or Ctrl-Q silently arms the prefix and eats the next keystroke.
+  assert.equal(S.matches(prefix, { key: 'q', code: 'KeyA', ...mods }), false, 'AZERTY Ctrl-Q');
+  // No Latin character at all, so position is the only signal left.
+  assert.equal(S.matches(prefix, { key: 'ф', code: 'KeyA', ...mods }), true, 'Cyrillic');
+  assert.equal(S.matches(prefix, { key: 'я', code: 'KeyQ', ...mods }), false, 'Cyrillic, wrong key');
+});
+
+test('the code fallback keeps Shift, since case selects the command', () => {
+  const S = loadSettings();
+  // On Cyrillic, Shift+H gives 'Р'. Losing the case turns H, history back,
+  // into h, scroll left.
+  assert.equal(S.actionKey('Р', 'KeyH', true), 'H');
+  assert.equal(S.actionKey('р', 'KeyH', false), 'h');
+  assert.equal(S.actionKey('г', 'KeyG', true), 'G', 'G is bottom, g is a pending gg');
+  assert.equal(S.actionKey('а', 'KeyF', true), 'F', 'F opens a background tab');
+});
+
 test('an action key falls back to the physical key on a non-Latin layout', () => {
   const S = loadSettings();
 
