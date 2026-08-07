@@ -91,7 +91,10 @@ globalThis.SV_UI = (() => {
       gap: 5px 14px;
       margin: 0;
     }
-    .help dt { font-size: 12px; color: #9ece6a; white-space: nowrap; }
+    /* No nowrap: minmax only requests the content width, it does not promise
+       it. In a narrow window a four-modifier prefix would overflow the cell and
+       print over the description again. Wrapping is ugly; overlapping is a bug. */
+    .help dt { font-size: 12px; color: #9ece6a; min-width: 0; overflow-wrap: anywhere; }
     .help dd { margin: 0; font-size: 12px; color: #a9b1d6; }
 
     .hint {
