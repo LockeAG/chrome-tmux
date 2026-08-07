@@ -64,7 +64,9 @@ test('an untouched prefix follows the platform', async ({ context, extensionId }
 
 test('a real keystroke arms the prefix, end to end', async ({ context, worker, site, prefix }) => {
   const page = await context.newPage();
-  await page.goto(site);
+  // A bare goto that hangs shows up as an opaque test timeout, so fail loudly.
+  const response = await page.goto(site);
+  expect(response?.ok(), 'the local test server did not answer').toBe(true);
   await page.locator('body').click();
 
   const tabId = await activeTabId(worker);
@@ -139,7 +141,7 @@ test('adding a site to the blocklist makes it inert, live', async ({ context, wo
 
   const options = await context.newPage();
   await options.goto(`chrome-extension://${extensionId}/src/options.html`);
-  await options.locator('#disabled').fill('localhost');
+  await options.locator('#disabled').fill(new URL(site).hostname);
   await options.locator('#save').click();
   await expect(options.locator('#status')).toHaveText(/saved/);
   await options.close();

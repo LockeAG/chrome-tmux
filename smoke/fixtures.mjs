@@ -27,7 +27,9 @@ export const test = base.extend({
     });
     await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
     const { port } = server.address();
-    await use(`http://localhost:${port}/`);
+    // 127.0.0.1 rather than localhost: on a CI runner localhost can resolve to
+    // ::1 first, and a server bound to IPv4 only then hangs the navigation.
+    await use(`http://127.0.0.1:${port}/`);
     await new Promise((resolve) => server.close(resolve));
   },
 
