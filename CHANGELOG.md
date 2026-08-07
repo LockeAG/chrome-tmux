@@ -12,6 +12,11 @@ loosely and [semantic versioning](https://semver.org/).
 - The footer and the help overlay name the prefix you actually have. Both had
   `C-a` written into them, so the moment anyone rebound the prefix the entire
   help screen was wrong.
+- The help screen's key column sizes to its content. It was a fixed 128px,
+  which even the default `Ctrl-A` overflowed, printing the key on top of the
+  description in the next column.
+- One notation in the help rather than two. Substituting the prefix left `C-o`
+  as the only tmux shorthand on a screen that spelled everything else out.
 
 ## 0.2.1 - 2026-08-07
 

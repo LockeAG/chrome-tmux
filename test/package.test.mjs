@@ -107,9 +107,11 @@ test('every prefix key in the help is implemented, and the other way round', () 
   const documented = new Set();
   for (const [, keys] of keymap[1].matchAll(/\['(C-a [^']+)'/g)) {
     for (const part of keys.replace('C-a ', '').split(' / ')) {
-      // Ctrl-O reaches the worker as a bare `o`, so C-o and o are one key.
-      const key = part.trim().replace(/^C-/, '');
-      if (key && key !== 'a' && key !== 'Esc') documented.add(key);
+      // Ctrl-O reaches the worker as a bare `o`, so Ctrl-O and o are one key.
+      const raw = part.trim();
+      const stripped = raw.replace(/^(Ctrl|C)-/i, '');
+      const key = stripped === raw ? raw : stripped.toLowerCase();
+      if (key && key !== 'a' && key.toLowerCase() !== 'esc') documented.add(key);
     }
   }
 

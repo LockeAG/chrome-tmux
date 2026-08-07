@@ -83,7 +83,14 @@ globalThis.SV_UI = (() => {
       margin: 0 0 8px; font-size: 10px; letter-spacing: .1em;
       text-transform: uppercase; color: #565f89; font-weight: 600;
     }
-    .help dl { display: grid; grid-template-columns: 128px 1fr; gap: 5px 14px; margin: 0; }
+    .help dl {
+      display: grid;
+      /* The key column has to fit whatever prefix the user chose, so it sizes
+         to its content rather than to a guess. */
+      grid-template-columns: minmax(128px, max-content) 1fr;
+      gap: 5px 14px;
+      margin: 0;
+    }
     .help dt { font-size: 12px; color: #9ece6a; white-space: nowrap; }
     .help dd { margin: 0; font-size: 12px; color: #a9b1d6; }
 
@@ -236,7 +243,7 @@ globalThis.SV_UI = (() => {
     const footer = el(
       'div',
       'footer',
-      `enter switch · ctrl-j/ctrl-k move · ctrl-x close tab · tab windows · esc · ${prefixLabel} , settings`
+      `Enter switch · Ctrl-J/Ctrl-K move · Ctrl-X close tab · Tab windows · Esc · ${prefixLabel} , settings`
     );
 
     panel.append(search, list, footer);
@@ -432,7 +439,7 @@ globalThis.SV_UI = (() => {
   /** @type {Array<[string, Array<[string, string]>]>} */
   const KEYMAP = [
     ['Prefix', [
-      ['C-a C-o / o / w', 'tab tree, searchable across every window'],
+      ['C-a Ctrl-O / o / w', 'tab tree, searchable across every window'],
       ['C-a s', 'the same tree, collapsed to windows'],
       ['C-a b / l', 'toggle to the last tab you were on'],
       ['C-a p', 'previous tab in order'],
@@ -459,11 +466,11 @@ globalThis.SV_UI = (() => {
     ]],
     ['In the tab tree', [
       ['type', 'filter'],
-      ['ctrl-j / ctrl-k', 'move, ctrl-n / ctrl-p and arrows too'],
-      ['ctrl-x', 'close the highlighted tab, list stays open'],
+      ['Ctrl-J / Ctrl-K', 'move, Ctrl-N / Ctrl-P and arrows too'],
+      ['Ctrl-X', 'close the highlighted tab, list stays open'],
       ['', 'tabs only, not the collapsed windows view'],
-      ['tab', 'toggle tabs and windows'],
-      ['enter / esc', 'switch / close']
+      ['Tab', 'toggle tabs and windows'],
+      ['Enter / Esc', 'switch / close']
     ]]
   ];
 
