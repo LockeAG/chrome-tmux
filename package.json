@@ -6,7 +6,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "tsc --noEmit && node --test 'test/*.test.mjs'",
-    "smoke": "playwright test"
+    "smoke": "playwright test",
+    "build:store": "node tools/build-store.cjs"
   },
   "type": "module",
   "devDependencies": {

@@ -7,6 +7,15 @@ loosely and [semantic versioning](https://semver.org/).
 
 ### Added
 
+- A search engine setting. The new tab page no longer hardcodes Google: pick a
+  preset, or write any URL with `%s` where the query goes. An unusable template
+  falls back rather than sending your query nowhere.
+- `npm run build:store` writes a narrower `dist/` for the Chrome Web Store,
+  without the New Tab Page. That drops the `topSites` and `favicon` permissions
+  and the override that reviewers are trained to distrust, leaving `tabs`,
+  `storage` and `scripting`. The repo keeps the full extension. The build fails
+  rather than ship a package that half-mentions a page it does not include, and
+  four tests check the two builds cannot quietly diverge.
 - CI on every push and pull request: types, unit tests and the browser smoke
   suite, the last under a virtual display because an extension needs a real
   browser. Failures upload the Playwright trace.

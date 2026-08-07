@@ -20,6 +20,7 @@
  * @typedef {object} Settings
  * @property {Prefix | null} prefix null means "whatever suits this platform"
  * @property {string[]} disabled host patterns where the extension stays out
+ * @property {string} search a search URL template with %s where the query goes
  */
 
 globalThis.SV_SETTINGS = (() => {
@@ -60,9 +61,52 @@ globalThis.SV_SETTINGS = (() => {
     'github.dev'
   ];
 
+  // Presets, not a policy. Anything with %s in it works, so nobody is stuck
+  // with a search engine somebody else picked.
+  const ENGINES = [
+    ['Google', 'https://www.google.com/search?q=%s'],
+    ['DuckDuckGo', 'https://duckduckgo.com/?q=%s'],
+    ['Bing', 'https://www.bing.com/search?q=%s'],
+    ['Brave', 'https://search.brave.com/search?q=%s'],
+    ['Kagi', 'https://kagi.com/search?q=%s'],
+    ['Ecosia', 'https://www.ecosia.org/search?q=%s'],
+    ['Startpage', 'https://www.startpage.com/sp/search?query=%s'],
+    ['Perplexity', 'https://www.perplexity.ai/search?q=%s']
+  ];
+
+  const DEFAULT_SEARCH = ENGINES[0][1];
+
+  /**
+   * A usable template is an http(s) URL with a %s to drop the query into.
+   * @param {any} input
+   * @returns {string}
+   */
+  function normaliseSearch(input) {
+    const text = String(input ?? '').trim();
+    if (!text.includes('%s')) return DEFAULT_SEARCH;
+    try {
+      const url = new URL(text.replace('%s', 'q'));
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') return DEFAULT_SEARCH;
+      return text;
+    } catch {
+      return DEFAULT_SEARCH;
+    }
+  }
+
+  /** @param {string} template @param {string} query */
+  function searchUrl(template, query) {
+    return normaliseSearch(template).replace('%s', encodeURIComponent(query));
+  }
+
+  /** @param {string} template */
+  function engineName(template) {
+    const preset = ENGINES.find(([, url]) => url === template);
+    return preset ? preset[0] : new URL(normaliseSearch(template).replace('%s', 'q')).hostname;
+  }
+
   /** @returns {Settings} */
   function defaults() {
-    return { prefix: null, disabled: [...DEFAULT_DISABLED] };
+    return { prefix: null, disabled: [...DEFAULT_DISABLED], search: DEFAULT_SEARCH };
   }
 
   /** @param {Settings} settings @returns {Prefix} */
@@ -131,7 +175,7 @@ globalThis.SV_SETTINGS = (() => {
       ? source.disabled.map(normaliseHost).filter(Boolean)
       : [];
 
-    return { prefix, disabled };
+    return { prefix, disabled, search: normaliseSearch(source.search) };
   }
 
   /**
@@ -256,7 +300,8 @@ globalThis.SV_SETTINGS = (() => {
   }
 
   return {
-    KEY, DEFAULT_DISABLED, defaults, normalise, normaliseHost, platformPrefix, effectivePrefix,
+    KEY, DEFAULT_DISABLED, ENGINES, DEFAULT_SEARCH, defaults, normalise, normaliseHost,
+    normaliseSearch, searchUrl, engineName, platformPrefix, effectivePrefix,
     load, save, matches, disabledFor, label, fromEvent, isReserved, isMac
   };
 })();

@@ -102,6 +102,9 @@ Windows and Linux. Set one deliberately and it syncs everywhere, which is what
 you want only if you use the same key on every machine. The site list always
 syncs.
 
+**Search engine.** Used by the new tab page. Pick a preset or write your own
+URL with `%s` where the query goes.
+
 **Sites to stay out of.** One host per line. `mail.google.com` matches that
 host, `*.figma.com` matches the domain and everything under it. On those sites
 no key is intercepted at all.
@@ -166,11 +169,17 @@ Two things it does on purpose, both the result of a security audit:
 ```fish
 npm test                                           # typecheck, then the test suite
 npm run smoke                                      # load it in a real Chrome
+npm run build:store                                # dist/, without the new tab
 npm run typecheck                                  # types only
 node tools/make-icons.cjs icons                    # extension icons
 node tools/make-store-shots.cjs <src> assets/store
 node tools/make-promo.cjs <capture> assets/store
 ```
+
+The store build is deliberately narrower: `npm run build:store` writes `dist/`
+without the New Tab Page, which drops the `topSites` and `favicon` permissions
+and the override that makes a review slow. The repo keeps the full extension;
+load that unpacked. Four tests check the two cannot quietly diverge.
 
 `tools/promo.html` is the cover art. Serve it, capture it at any size, and
 `make-promo.cjs` cuts it into the cover, tile and marquee.

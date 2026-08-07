@@ -115,9 +115,34 @@ test('disabled hosts match exactly, wildcards match the domain and below', () =>
   assert.equal(S.disabledFor(list, ''), false);
 });
 
+test('a search template must be a web URL with a place for the query', () => {
+  const S = loadSettings();
+  assert.equal(S.normaliseSearch('https://duckduckgo.com/?q=%s'), 'https://duckduckgo.com/?q=%s');
+  // Anything unusable falls back rather than sending the query nowhere.
+  assert.equal(S.normaliseSearch('https://example.com/'), S.DEFAULT_SEARCH, 'no %s');
+  assert.equal(S.normaliseSearch('javascript:alert(1)?q=%s'), S.DEFAULT_SEARCH, 'not a web URL');
+  assert.equal(S.normaliseSearch('not a url %s'), S.DEFAULT_SEARCH);
+  assert.equal(S.normaliseSearch(null), S.DEFAULT_SEARCH);
+
+  assert.equal(
+    S.searchUrl('https://kagi.com/search?q=%s', 'a b&c'),
+    'https://kagi.com/search?q=a%20b%26c',
+    'the query is escaped'
+  );
+  assert.equal(S.engineName('https://duckduckgo.com/?q=%s'), 'DuckDuckGo');
+  assert.equal(S.engineName('https://my.intranet/find?q=%s'), 'my.intranet', 'custom shows its host');
+});
+
+test('every shipped engine preset is a usable template', () => {
+  const S = loadSettings();
+  for (const [name, url] of S.ENGINES) {
+    assert.equal(S.normaliseSearch(url), url, `preset must survive: ${name}`);
+  }
+});
+
 test('malformed stored settings cannot throw or grant a bad prefix', () => {
   const S = loadSettings();
-  assert.deepEqual(S.normalise(null), { prefix: null, disabled: [] });
+  assert.deepEqual(S.normalise(null), { prefix: null, disabled: [], search: S.DEFAULT_SEARCH });
   assert.deepEqual(S.normalise({ disabled: 'not-an-array' }).disabled, []);
   assert.equal(S.normalise({ prefix: { code: 'KeyA' } }).prefix, null, 'no modifier means no prefix');
   assert.equal(S.normalise({ prefix: {} }).prefix, null);

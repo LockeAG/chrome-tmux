@@ -30,6 +30,9 @@ export const test = base.extend({
     // 127.0.0.1 rather than localhost: on a CI runner localhost can resolve to
     // ::1 first, and a server bound to IPv4 only then hangs the navigation.
     await use(`http://127.0.0.1:${port}/`);
+    // close() waits for open connections, and the browser holds a keep-alive
+    // socket, so without this the teardown hangs until the test times out.
+    server.closeAllConnections?.();
     await new Promise((resolve) => server.close(resolve));
   },
 

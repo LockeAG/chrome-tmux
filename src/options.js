@@ -2,6 +2,8 @@
 
 const CONFIG = globalThis.SV_SETTINGS;
 
+const engineSelect = /** @type {HTMLSelectElement} */ (document.getElementById('engine'));
+const customInput = /** @type {HTMLInputElement} */ (document.getElementById('custom'));
 const prefixButton = /** @type {HTMLButtonElement} */ (document.getElementById('prefix'));
 const prefixNote = /** @type {HTMLElement} */ (document.getElementById('prefix-note'));
 const disabledBox = /** @type {HTMLTextAreaElement} */ (document.getElementById('disabled'));
@@ -14,7 +16,19 @@ let capturing = false;
 // push the wipe to every machine.
 let degraded = false;
 
+function renderEngine() {
+  if (!engineSelect.options.length) {
+    for (const [name, url] of CONFIG.ENGINES) engineSelect.add(new Option(name, url));
+    engineSelect.add(new Option('Custom', 'custom'));
+  }
+  const preset = CONFIG.ENGINES.some(([, url]) => url === current.search);
+  engineSelect.value = preset ? current.search : 'custom';
+  customInput.hidden = preset;
+  if (!preset) customInput.value = current.search;
+}
+
 function render() {
+  renderEngine();
   const prefix = CONFIG.effectivePrefix(current);
   prefixButton.textContent = capturing ? 'press a key…' : CONFIG.label(prefix);
 
@@ -85,6 +99,20 @@ prefixButton.addEventListener('keydown', (event) => {
   render();
 });
 
+engineSelect.addEventListener('change', () => {
+  if (engineSelect.value === 'custom') {
+    customInput.hidden = false;
+    customInput.focus();
+    return;
+  }
+  current = { ...current, search: engineSelect.value };
+  render();
+});
+
+customInput.addEventListener('input', () => {
+  current = { ...current, search: customInput.value };
+});
+
 document.getElementById('save')?.addEventListener('click', async () => {
   if (degraded) return;
   const typed = disabledBox.value.split('\n').map((line) => line.trim()).filter(Boolean);
@@ -104,7 +132,10 @@ document.getElementById('save')?.addEventListener('click', async () => {
   render();
 
   const dropped = typed.length - current.disabled.length;
-  say(dropped > 0 ? `saved, ${dropped} line(s) were not usable hosts` : 'saved');
+  if (dropped > 0) say(`saved, ${dropped} line(s) were not usable hosts`);
+  else if (customInput.value.trim() && !customInput.value.includes('%s')) {
+    say('saved, but the custom search URL needs a %s, so Google was kept');
+  } else say('saved');
 });
 
 document.getElementById('reset')?.addEventListener('click', async () => {
