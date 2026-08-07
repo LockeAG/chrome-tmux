@@ -5,6 +5,15 @@ loosely and [semantic versioning](https://semver.org/).
 
 ## Unreleased
 
+### Fixed
+
+- The replacement New Tab Page had been dead since the settings feature landed:
+  it loaded the content scripts but not `settings.js`, so the first line threw
+  and no key worked there. The same omission in the on-demand injection path was
+  caught before release; this one was not.
+- The popup and the New Tab Page both stated the prefix was `Ctrl-A`. It is
+  per-platform and rebindable, so both now show the one you actually have.
+
 ### Security
 
 - **Synthetic keyboard events are ignored.** The key handler did not check
@@ -20,16 +29,19 @@ loosely and [semantic versioning](https://semver.org/).
 
 ### Added
 
-- `C-a ,` opens the settings page, following the macOS convention that comma is
-  preferences.
-- The site list ships with sensible defaults rather than empty: Gmail, Google
-  Docs, Office on the web, SharePoint, Overleaf, Notion, Figma, Slack,
-  `vscode.dev` and `github.dev`. Documents and spreadsheets need `Ctrl-A` more
-  than a tab switcher does. They appear in the settings box rather than being
-  hidden, so any can be deleted, and emptying the list keeps it empty.
-- A settings page. The prefix is now rebindable: click the box, press the
-  combination. Plus a list of sites to stay out of, one host per line, with
-  `*.domain` wildcards. On those sites no key is intercepted at all.
+- A settings page, reachable with `C-a ,`, from the popup, or by right-clicking
+  the toolbar icon. The prefix is now rebindable: click the box, press the
+  combination. Alongside it, a list of sites to stay out of, one host per line,
+  with `*.domain` wildcards. On those sites no key is intercepted at all.
+- Settings are stored in `chrome.storage.sync`, so Chrome carries them between
+  your signed-in machines the way it carries bookmarks. A local copy guards
+  against a sync failure losing the list. This is a new data flow and is
+  documented in [PRIVACY.md](PRIVACY.md).
+- The site list ships with defaults rather than empty: Gmail, Google Docs,
+  Office on the web, SharePoint, Overleaf, Notion, Figma, Slack, `vscode.dev`
+  and `github.dev`. A spreadsheet needs `Ctrl-A` more than a tab switcher does.
+  They appear in the settings box rather than being hidden, so any can be
+  deleted, and emptying the list keeps it empty.
 - The prefix defaults per machine rather than syncing: `Ctrl-A` on macOS,
   `Alt-A` elsewhere, since `Ctrl-A` is select-all off macOS. It only syncs once
   you set one deliberately, so saving a blocklist entry on a Mac cannot push

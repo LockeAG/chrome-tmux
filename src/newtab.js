@@ -1,6 +1,13 @@
 // @ts-check
 const search = /** @type {HTMLInputElement} */ (document.getElementById('q'));
 
+// Name the prefix the user actually has, not the macOS default.
+globalThis.SV_SETTINGS.load().then((settings) => {
+  const config = globalThis.SV_SETTINGS;
+  const prefix = config.effectivePrefix(settings ?? config.defaults());
+  /** @type {HTMLElement} */ (document.getElementById('prefix')).textContent = config.label(prefix);
+});
+
 // Chrome parks focus in the omnibox when an extension overrides the New Tab
 // Page, and it does so around load rather than before it. A single focus()
 // call races that and loses, which is why Cmd-T used to leave you typing in

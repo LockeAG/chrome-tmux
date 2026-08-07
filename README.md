@@ -47,6 +47,7 @@ it waits. No timeout, same as tmux.
 | `,` | settings |
 | `?` | show every key, in the page |
 | `Ctrl-A` | jump the caret to the start of the line |
+| `Esc` | cancel, having pressed the prefix by mistake |
 
 ## Vim mode
 
@@ -93,9 +94,11 @@ array in `src/calls.js`, with a test beside it.
 `Ctrl-A` then `,`. Or right-click the toolbar icon and pick Options, or open
 Settings from the popup.
 
-**Prefix.** Click the box and press what you want. The default is `Ctrl-A` on
-macOS and `Alt-A` everywhere else, because `Ctrl-A` is select-all on Windows
-and Linux. Settings sync with your Chrome profile.
+**Prefix.** Click the box and press what you want. Left alone it follows each
+machine: `Ctrl-A` on macOS, `Alt-A` elsewhere, because `Ctrl-A` is select-all on
+Windows and Linux. Set one deliberately and it syncs everywhere, which is what
+you want only if you use the same key on every machine. The site list always
+syncs.
 
 **Sites to stay out of.** One host per line. `mail.google.com` matches that
 host, `*.figma.com` matches the domain and everything under it. On those sites
@@ -109,10 +112,10 @@ with. Empty the list entirely and it stays empty.
 
 ## The one annoying trade
 
-The prefix is taken everywhere in Chrome, including inside text boxes, so with
-the macOS default you lose "jump to the start of the line". Press the prefix
-twice to get it back, like `send-prefix` in tmux. Or rebind it, or switch it off
-for the sites where it gets in the way.
+The prefix is taken on every page it runs on, inside text boxes too, so with the
+macOS default you lose "jump to the start of the line". Press the prefix twice
+to get it back, like `send-prefix` in tmux. Or rebind it, or add the site to the
+list above.
 
 ## The new tab
 
@@ -126,14 +129,16 @@ takes focus back as it loads. If one ever ignores you, click it once.
 
 - `chrome://` pages, the Web Store and the PDF viewer are dead. No way round it.
   Binding a browser-level shortcut makes it worse, not better: Chrome would then
-  swallow `Ctrl-A` before any page sees it.
+  swallow the prefix before any page sees it.
 - Keys in the omnibox belong to Chrome, not to the page.
 - The keymap beyond the prefix is not configurable; it lives in the source.
 - Link hints skip iframes. Find uses `window.find`, old and unofficial.
 - No counts like `3j`, no marks.
 - Teams only matches its join page; it rewrites the URL once you are in a call.
-- Discord and Slack are absent on purpose. A voice channel or a huddle does not
-  change the URL, so any pattern would flag every channel you have open.
+- Discord and Slack are absent from call detection on purpose. A voice channel
+  or a huddle does not change the URL, so any pattern would flag every channel
+  you have open. Slack is on the default site list for a separate reason: it
+  wants its own keys.
 - `Ctrl-X` reports success as soon as Chrome accepts the close. A page that
   stops you leaving with a dialog can survive it and reappear in the list.
 
@@ -157,7 +162,7 @@ Two things it does on purpose, both the result of a security audit:
 ## Development
 
 ```fish
-npm test                                           # typecheck + call URL patterns
+npm test                                           # typecheck, then the test suite
 npm run typecheck                                  # types only
 node tools/make-icons.cjs icons                    # extension icons
 node tools/make-store-shots.cjs <src> assets/store

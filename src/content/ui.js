@@ -414,7 +414,8 @@ globalThis.SV_UI = (() => {
       ['C-a v', 'toggle vim mode'],
       ['C-a ,', 'settings: prefix and per-site opt-out'],
       ['C-a ?', 'this help'],
-      ['C-a C-a', 'move caret to line start']
+      ['C-a C-a', 'move caret to line start'],
+      ['C-a Esc', 'cancel the prefix']
     ]],
     ['Vim mode', [
       ['h j k l', 'scroll'],
