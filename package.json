@@ -1,6 +1,6 @@
 {
   "name": "chrome-tmux",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "description": "A tmux-style prefix and a vim mode for Chrome.",
   "scripts": {

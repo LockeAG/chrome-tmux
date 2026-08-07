@@ -201,7 +201,7 @@ https://github.com/LockeAG/chrome-tmux/blob/main/PRIVACY.md
 - [ ] Load that zip unpacked once and press the keys. It is a different build
       from the one you have been using: no New Tab Page, and `tabs`, `storage`
       and `scripting` where the repo build also has `topSites` and `favicon`
-- [ ] Check `manifest.json` in the zip says `0.2.1` and lists exactly
+- [ ] Check `manifest.json` in the zip says `0.2.2` and lists exactly
       `tabs`, `storage`, `scripting`
 - [ ] Screenshots: `assets/store/screenshot-01.png` and `-02.png`, 1280x800
 - [ ] Small promo tile: `assets/store/promo-small.png`, 440x280
