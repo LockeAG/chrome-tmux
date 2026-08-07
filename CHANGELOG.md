@@ -7,6 +7,13 @@ loosely and [semantic versioning](https://semver.org/).
 
 ### Added
 
+- A browser smoke suite, `npm run smoke`. Playwright loads the extension into a
+  real Chrome and checks what no unit test can: the service worker starts and
+  stays up, the new tab, options and popup pages load every script they depend
+  on with no page errors, a trusted keystroke arms the prefix while a
+  page-dispatched one does not, `C-a c` really opens a tab, and blocklisting a
+  site makes an already-open tab stand down without a reload. Both bugs that
+  reached users this session would have been caught by it.
 - Tests that check the package holds together, not just that the logic is
   right. The content scripts are loaded from five places, the manifest, the
   on-demand injection and three HTML pages, and nothing in Chrome keeps those

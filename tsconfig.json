@@ -27,5 +27,10 @@
     "test/**/*.mjs",
     "tools/**/*.cjs",
     "tools/**/*.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "smoke",
+    "test-results"
   ]
 }

@@ -163,6 +163,7 @@ Two things it does on purpose, both the result of a security audit:
 
 ```fish
 npm test                                           # typecheck, then the test suite
+npm run smoke                                      # load it in a real Chrome
 npm run typecheck                                  # types only
 node tools/make-icons.cjs icons                    # extension icons
 node tools/make-store-shots.cjs <src> assets/store

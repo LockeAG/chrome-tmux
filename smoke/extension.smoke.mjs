@@ -1,0 +1,142 @@
+import { test, expect, badge, activeTabId } from './fixtures.mjs';
+
+/* The bugs that cost the most in this project were all invisible to `npm test`:
+   a service worker that failed to import and died silently, and pages that
+   loaded the content scripts but not their dependencies. Both are one page load
+   away from obvious. These tests are that page load. */
+
+test('the service worker starts and stays up', async ({ worker }) => {
+  expect(worker.url()).toContain('background.js');
+  // If the module graph failed to load, evaluating in it throws.
+  const alive = await worker.evaluate(() => typeof chrome.tabs.query === 'function');
+  expect(alive).toBe(true);
+});
+
+test('the new tab page loads every script it depends on', async ({ context, extensionId }) => {
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.goto(`chrome-extension://${extensionId}/src/newtab.html`);
+
+  // This page shipped dead once: it loaded main.js without settings.js, so the
+  // first line threw and nothing on it worked.
+  expect(errors).toEqual([]);
+  expect(await page.evaluate(() => typeof globalThis.SV_SETTINGS)).toBe('object');
+  expect(await page.evaluate(() => typeof globalThis.SV_UI)).toBe('object');
+  await expect(page.locator('#q')).toBeVisible();
+  // The footer names the real prefix, which means settings resolved.
+  await expect(page.locator('#prefix')).not.toHaveText('…');
+});
+
+test('the options page loads and resolves the prefix', async ({ context, extensionId }) => {
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.goto(`chrome-extension://${extensionId}/src/options.html`);
+
+  expect(errors).toEqual([]);
+  await expect(page.locator('#prefix')).not.toHaveText('…');
+  await expect(page.locator('#disabled')).toBeVisible();
+  // The shipped blocklist should be in the box, not hidden.
+  expect(await page.locator('#disabled').inputValue()).toContain('mail.google.com');
+});
+
+test('the popup loads and names the prefix', async ({ context, extensionId }) => {
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.goto(`chrome-extension://${extensionId}/src/popup.html`);
+
+  expect(errors).toEqual([]);
+  await expect(page.locator('#prefix')).not.toHaveText('…');
+});
+
+test('a real keystroke arms the prefix, end to end', async ({ context, worker, site }) => {
+  const page = await context.newPage();
+  await page.goto(site);
+  await page.locator('body').click();
+
+  const tabId = await activeTabId(worker);
+  expect(await badge(worker, tabId)).toBe('');
+
+  // Playwright presses keys through CDP, so these are trusted events. That is
+  // the whole chain: content script, message to the worker, stored state.
+  await page.keyboard.press('Control+a');
+  await expect.poll(() => badge(worker, tabId)).toBe('^A');
+});
+
+test('a synthetic keystroke does not, because pages must not drive this', async ({ context, worker, site }) => {
+  const page = await context.newPage();
+  await page.goto(site);
+  await page.locator('body').click();
+  const tabId = await activeTabId(worker);
+
+  // Exactly the attack the isTrusted guard exists for: a page dispatching its
+  // own KeyboardEvent to arm the prefix and then close the tab.
+  await page.evaluate(() => {
+    window.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'a', code: 'KeyA', ctrlKey: true, bubbles: true, cancelable: true
+    }));
+  });
+
+  await page.waitForTimeout(300);
+  expect(await badge(worker, tabId)).toBe('');
+});
+
+test('the prefix runs an action', async ({ context, worker, site }) => {
+  const page = await context.newPage();
+  await page.goto(site);
+  await page.locator('body').click();
+
+  const before = await worker.evaluate(async () => (await chrome.tabs.query({})).length);
+  await page.keyboard.press('Control+a');
+  await page.keyboard.press('c');
+
+  // `C-a c` opens a tab, which is observable without reaching into the closed
+  // shadow root the overlay lives in.
+  await expect
+    .poll(() => worker.evaluate(async () => (await chrome.tabs.query({})).length))
+    .toBe(before + 1);
+});
+
+test('vim mode toggles and shows in the badge', async ({ context, worker, site }) => {
+  const page = await context.newPage();
+  await page.goto(site);
+  await page.locator('body').click();
+  const tabId = await activeTabId(worker);
+
+  await page.keyboard.press('Control+a');
+  await page.keyboard.press('v');
+  await expect.poll(() => badge(worker, tabId)).toBe('V');
+
+  await page.keyboard.press('Escape');
+  await expect.poll(() => badge(worker, tabId)).toBe('');
+});
+
+test('adding a site to the blocklist makes it inert, live', async ({ context, worker, extensionId, site }) => {
+  const page = await context.newPage();
+  await page.goto(site);
+  await page.locator('body').click();
+  const tabId = await activeTabId(worker);
+
+  // Prove it works here first, or "inert" is indistinguishable from "the
+  // content script never loaded", which is how the old version of this test
+  // passed while proving nothing.
+  await page.keyboard.press('Control+a');
+  await expect.poll(() => badge(worker, tabId)).toBe('^A');
+  await page.keyboard.press('Escape');
+
+  const options = await context.newPage();
+  await options.goto(`chrome-extension://${extensionId}/src/options.html`);
+  await options.locator('#disabled').fill('localhost');
+  await options.locator('#save').click();
+  await expect(options.locator('#status')).toHaveText(/saved/);
+  await options.close();
+
+  // No reload: the open tab must stand down on its own.
+  await page.bringToFront();
+  await page.locator('body').click();
+  await page.keyboard.press('Control+a');
+  await page.waitForTimeout(500);
+  expect(await badge(worker, tabId)).toBe('');
+});

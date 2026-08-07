@@ -5,10 +5,12 @@
   "description": "A tmux-style prefix and a vim mode for Chrome.",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "tsc --noEmit && node --test 'test/*.test.mjs'"
+    "test": "tsc --noEmit && node --test 'test/*.test.mjs'",
+    "smoke": "playwright test"
   },
   "type": "module",
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@types/chrome": "^0.2.5",
     "@types/node": "^26.1.2",
     "typescript": "^7.0.2"

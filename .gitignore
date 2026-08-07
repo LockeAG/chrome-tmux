@@ -7,3 +7,5 @@ CLAUDE.md
 .DS_Store
 node_modules/
 *.zip
+test-results/
+playwright-report/
