@@ -36,21 +36,18 @@ const context = await chromium.launchPersistentContext(profile, {
   channel: 'chromium',
   viewport: SIZE,
   deviceScaleFactor: SCALE,
+  // The extension is Tokyo Night. A light-mode settings page next to two dark
+  // overlays looks like two different products.
+  colorScheme: 'dark',
   args: [`--disable-extensions-except=${store}`, `--load-extension=${store}`]
 });
 
 const worker = context.serviceWorkers()[0] ?? (await context.waitForEvent('serviceworker'));
 const extensionId = new URL(worker.url()).host;
 
-// Pin the prefix so the overlays read Ctrl-A whatever platform this runs on.
-await worker.evaluate(() =>
-  chrome.storage.sync.set({
-    settings: {
-      prefix: { ctrl: true, alt: false, shift: false, meta: false, code: 'KeyA', key: 'a' },
-      disabled: []
-    }
-  })
-);
+// Nothing is written to storage on purpose: the shots should show what someone
+// sees on a fresh install, including the shipped blocklist. Run this on macOS,
+// where the default prefix is Ctrl-A.
 
 mkdirSync(out, { recursive: true });
 
