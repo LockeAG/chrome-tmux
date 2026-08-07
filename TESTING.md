@@ -1,7 +1,7 @@
 # Manual check
 
 Everything here is a real failure this extension has had, or a place where the
-tests and the type checker are blind. `npm test` cannot load a browser, so this
+tests and the type checker are blind. `pnpm test` cannot load a browser, so this
 is the only thing standing between a green suite and a dead extension.
 
 Work top to bottom. Stop and report at the first thing that does not do what it

@@ -77,12 +77,54 @@ test('the prefix matches modifiers exactly', () => {
   assert.equal(S.matches(prefix, press({ code: 'KeyB', ctrlKey: true })), false);
 });
 
+test('the prefix fires on either the position or the keycap', () => {
+  const S = loadSettings();
+  const prefix = { ctrl: true, alt: false, shift: false, meta: false, code: 'KeyA', key: 'a' };
+  const mods = { ctrlKey: true, altKey: false, metaKey: false, shiftKey: false };
+
+  assert.equal(S.matches(prefix, { key: 'a', code: 'KeyA', ...mods }), true, 'QWERTY');
+  // AZERTY: the key labelled A sits where QWERTY has Q.
+  assert.equal(S.matches(prefix, { key: 'a', code: 'KeyQ', ...mods }), true, 'AZERTY, by keycap');
+  // Cyrillic: no Latin character at all, so only the position can match.
+  assert.equal(S.matches(prefix, { key: 'ф', code: 'KeyA', ...mods }), true, 'Cyrillic, by position');
+  // macOS Option composing: the character is useless, the position is not.
+  assert.equal(S.matches(prefix, { key: 'å', code: 'KeyA', ...mods }), true, 'Option composed');
+
+  assert.equal(S.matches(prefix, { key: 'b', code: 'KeyB', ...mods }), false);
+  assert.equal(S.matches(prefix, { key: 'a', code: 'KeyA', ...mods, shiftKey: true }), false);
+});
+
+test('an action key falls back to the physical key on a non-Latin layout', () => {
+  const S = loadSettings();
+
+  // A Latin layout gives the character, so `w` means window whatever the
+  // keycaps say and AZERTY users keep their mnemonics.
+  assert.equal(S.actionKey('w', 'KeyW'), 'w');
+  assert.equal(S.actionKey('a', 'KeyQ'), 'a', 'AZERTY keeps its label');
+  assert.equal(S.actionKey('G', 'KeyG'), 'G', 'case is preserved for vim keys');
+  assert.equal(S.actionKey('?', 'Slash'), '?');
+  assert.equal(S.actionKey(',', 'Comma'), ',');
+  assert.equal(S.actionKey('1', 'Digit1'), '1');
+
+  // A non-Latin layout gives no usable character, so use the position.
+  assert.equal(S.actionKey('ц', 'KeyW'), 'w', 'Cyrillic');
+  assert.equal(S.actionKey('π', 'KeyP'), 'p', 'Greek');
+  assert.equal(S.actionKey('Dead', 'KeyE'), 'e', 'a dead key still means something');
+  assert.equal(S.actionKey('б', 'Comma'), ',');
+});
+
 test('capture uses the physical key, so macOS Option combos survive', () => {
   const S = loadSettings();
   // Option-A reports key 'å' and Option-E reports 'Dead'; code is stable.
+  // 'å' is not a plain ASCII character, so only the position is remembered.
   assert.deepEqual(
     S.fromEvent({ ...press({ altKey: true }), key: 'å' }),
     { ctrl: false, alt: true, shift: false, meta: false, code: 'KeyA' }
+  );
+  // A plain character is remembered too, so the binding survives a layout change.
+  assert.deepEqual(
+    S.fromEvent({ ...press({ ctrlKey: true }), key: 'a' }),
+    { ctrl: true, alt: false, shift: false, meta: false, code: 'KeyA', key: 'a' }
   );
   assert.equal(S.fromEvent(press({ code: 'ControlLeft', ctrlKey: true })), null);
   assert.equal(S.fromEvent(press()), null, 'a bare key is not a prefix');

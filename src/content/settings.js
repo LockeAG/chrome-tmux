@@ -5,15 +5,23 @@
    scripts and cannot import. Both sides load this file and read the global. */
 
 /**
- * A physical key plus modifiers. `code` rather than `key`, because on macOS
- * Option composes: Option-A gives `key: 'å'` and Option-E gives `key: 'Dead'`,
- * neither of which survives a trip to another machine or another layout.
+ * A key plus modifiers, remembered two ways on purpose.
+ *
+ * `code` is the physical key. It survives macOS Option composing, where
+ * Option-A gives `key: 'å'` and Option-E gives `key: 'Dead'`.
+ *
+ * `key` is the character on the keycap. It survives a layout where the letters
+ * sit elsewhere: on AZERTY the key labelled A reports `code: 'KeyQ'`, so
+ * matching on code alone would mean the prefix is on the key labelled Q.
+ *
+ * Either one matching is enough, which covers both.
  * @typedef {object} Prefix
  * @property {boolean} ctrl
  * @property {boolean} alt
  * @property {boolean} shift
  * @property {boolean} meta
  * @property {string} code
+ * @property {string} [key] the character, when it is a plain ASCII one
  */
 
 /**
@@ -39,8 +47,8 @@ globalThis.SV_SETTINGS = (() => {
    */
   function platformPrefix() {
     return isMac()
-      ? { ctrl: true, alt: false, shift: false, meta: false, code: 'KeyA' }
-      : { ctrl: false, alt: true, shift: false, meta: false, code: 'KeyA' };
+      ? { ctrl: true, alt: false, shift: false, meta: false, code: 'KeyA', key: 'a' }
+      : { ctrl: false, alt: true, shift: false, meta: false, code: 'KeyA', key: 'a' };
   }
 
   // Apps where the browser's own editing matters more than a prefix. Documents,
@@ -165,7 +173,8 @@ globalThis.SV_SETTINGS = (() => {
         alt: Boolean(p.alt),
         shift: Boolean(p.shift),
         meta: Boolean(p.meta),
-        code: p.code
+        code: p.code,
+        ...(isPlainKey(p.key) ? { key: String(p.key).toLowerCase() } : {})
       };
       // A prefix with no modifier would swallow a plain letter everywhere.
       if (!prefix.ctrl && !prefix.alt && !prefix.meta) prefix = null;
@@ -224,13 +233,19 @@ globalThis.SV_SETTINGS = (() => {
    * @param {KeyboardEvent} event
    */
   function matches(prefix, event) {
-    return (
-      event.code === prefix.code &&
+    const modifiers =
       event.ctrlKey === prefix.ctrl &&
       event.altKey === prefix.alt &&
       event.metaKey === prefix.meta &&
-      event.shiftKey === prefix.shift
-    );
+      event.shiftKey === prefix.shift;
+    if (!modifiers) return false;
+
+    // Position or label, whichever the layout gives us. On a Cyrillic layout
+    // the character is 'ф' and only the code helps; on AZERTY the code has
+    // moved and only the character does.
+    if (event.code === prefix.code) return true;
+    return Boolean(prefix.key) && isPlainKey(event.key) &&
+      String(event.key).toLowerCase() === prefix.key;
   }
 
   /**
@@ -252,6 +267,26 @@ globalThis.SV_SETTINGS = (() => {
     });
   }
 
+  /** A single ASCII character, the only kind worth comparing across layouts. */
+  const isPlainKey = (value) => typeof value === 'string' && /^[\x20-\x7e]$/.test(value);
+
+  /**
+   * The character an action key stands for. Latin layouts give it directly, so
+   * `w` means window whatever the keycaps say. A non-Latin layout gives no
+   * Latin character at all, so fall back to the physical key, which is what is
+   * usually printed on the keycap next to the local letter.
+   * @param {string} key
+   * @param {string} code
+   */
+  function actionKey(key, code) {
+    if (isPlainKey(key)) return key;
+    if (typeof code !== 'string') return key;
+    if (code.startsWith('Key')) return code.slice(3).toLowerCase();
+    if (code.startsWith('Digit')) return code.slice(5);
+    const punctuation = { Comma: ',', Period: '.', Slash: '/', Semicolon: ';', Quote: "'" };
+    return punctuation[code] ?? key;
+  }
+
   /** @param {string} code */
   function keyLabel(code) {
     if (code.startsWith('Key')) return code.slice(3);
@@ -266,7 +301,8 @@ globalThis.SV_SETTINGS = (() => {
     if (prefix.alt) parts.push(isMac() ? 'Option' : 'Alt');
     if (prefix.shift) parts.push('Shift');
     if (prefix.meta) parts.push(isMac() ? 'Cmd' : 'Win');
-    parts.push(keyLabel(prefix.code));
+    // Show the keycap where we know it, since that is what the user pressed.
+    parts.push(prefix.key ? prefix.key.toUpperCase() : keyLabel(prefix.code));
     return parts.join('-');
   }
 
@@ -295,13 +331,14 @@ globalThis.SV_SETTINGS = (() => {
       alt: event.altKey,
       shift: event.shiftKey,
       meta: event.metaKey,
-      code: event.code
+      code: event.code,
+      ...(isPlainKey(event.key) ? { key: event.key.toLowerCase() } : {})
     };
   }
 
   return {
     KEY, DEFAULT_DISABLED, ENGINES, DEFAULT_SEARCH, defaults, normalise, normaliseHost,
-    normaliseSearch, searchUrl, engineName, platformPrefix, effectivePrefix,
+    normaliseSearch, searchUrl, engineName, platformPrefix, effectivePrefix, actionKey,
     load, save, matches, disabledFor, label, fromEvent, isReserved, isMac
   };
 })();

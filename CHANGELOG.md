@@ -36,6 +36,19 @@ loosely and [semantic versioning](https://semver.org/).
   help overlay and the service worker document the same set of prefix keys.
   Each guard was checked by reintroducing the bug it exists for.
 
+### Changed
+
+- The prefix and every action key now match on the character **or** the physical
+  key, whichever the layout provides. Before, the prefix matched only the
+  position and actions only the character, which contradicted each other: on a
+  Cyrillic layout every action was silently dead, because the worker received
+  'ц' where it expected 'w'; on AZERTY the prefix sat on the key labelled Q
+  while the popup insisted it was A. A Latin layout keeps its keycaps, so `w`
+  still means window on AZERTY, and a non-Latin one falls back to the position
+  printed on the same keycap.
+- pnpm rather than npm, with a `packageManager` field and a frozen lockfile in
+  CI.
+
 ### Fixed
 
 - The replacement New Tab Page had been dead since the settings feature landed:

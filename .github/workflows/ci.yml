@@ -12,24 +12,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: pnpm
 
-      - run: npm ci
+      - run: pnpm install --frozen-lockfile
 
       # Types, the call URL patterns, and the package-drift guards.
       - name: Unit tests
-        run: npm test
+        run: pnpm test
 
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium
 
       # An extension needs a real browser, not the headless shell, so this runs
       # under a virtual display rather than headless.
       - name: Browser smoke tests
-        run: xvfb-run -a npm run smoke
+        run: xvfb-run -a pnpm smoke
 
       - uses: actions/upload-artifact@v4
         if: failure()

@@ -167,16 +167,16 @@ Two things it does on purpose, both the result of a security audit:
 ## Development
 
 ```fish
-npm test                                           # typecheck, then the test suite
-npm run smoke                                      # load it in a real Chrome
-npm run build:store                                # dist/, without the new tab
+pnpm test                                          # typecheck, then the test suite
+pnpm smoke                                         # load it in a real Chrome
+pnpm build:store                                   # dist/, without the new tab
 npm run typecheck                                  # types only
 node tools/make-icons.cjs icons                    # extension icons
 node tools/make-store-shots.cjs <src> assets/store
 node tools/make-promo.cjs <capture> assets/store
 ```
 
-The store build is deliberately narrower: `npm run build:store` writes `dist/`
+The store build is deliberately narrower: `pnpm build:store` writes `dist/`
 without the New Tab Page, which drops the `topSites` and `favicon` permissions
 and the override that makes a review slow. The repo keeps the full extension;
 load that unpacked. Four tests check the two cannot quietly diverge.

@@ -189,7 +189,9 @@
   /* Vim keys */
 
   function handleVimKey(event) {
-    const key = event.key;
+    // On a Cyrillic layout `event.key` is 'ц' where the keycap says W, so fall
+    // back to the physical key rather than leaving vim mode dead.
+    const key = CONFIG.actionKey(event.key, event.code);
 
     if (pendingG) {
       clearTimeout(gTimer);
@@ -276,7 +278,7 @@
     }
 
     if (UI.hintsOpen()) {
-      const result = UI.feedHint(event.key);
+      const result = UI.feedHint(CONFIG.actionKey(event.key, event.code));
       if (result !== 'ignored') {
         event.preventDefault();
         event.stopPropagation();
@@ -293,12 +295,12 @@
         return;
       }
       // Help is drawn in the page, so it needs no round trip.
-      if (event.key === '?') {
+      if (CONFIG.actionKey(event.key, event.code) === '?') {
         send({ type: 'disarm' });
         UI.openHelp();
         return;
       }
-      send({ type: 'armedKey', key: event.key }).then((response) => {
+      send({ type: 'armedKey', key: CONFIG.actionKey(event.key, event.code) }).then((response) => {
         if (response?.mode) setMode(response.mode);
       });
       return;
